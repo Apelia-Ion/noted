@@ -60,7 +60,9 @@ export class ExportImportService {
     const a    = document.createElement('a');
     a.href     = url;
     a.download = `noted-export-${new Date().toISOString().slice(0, 10)}.noted`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 

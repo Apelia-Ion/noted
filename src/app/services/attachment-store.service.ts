@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 
 /**
  * AttachmentStoreService wraps IndexedDB to store binary blobs for media notes.
@@ -20,7 +20,7 @@ export class AttachmentStoreService {
   private readonly STORE  = 'blobs';
   private dbPromise: Promise<IDBDatabase> | null = null;
 
-  constructor() {
+  constructor(private ngZone: NgZone) {
     if (typeof indexedDB !== 'undefined') {
       this.dbPromise = this.openDb();
     }
@@ -28,6 +28,12 @@ export class AttachmentStoreService {
 
   // ── Internal ──────────────────────────────────────────────────────────────
 
+  /**
+   * IDB event callbacks (onsuccess, oncomplete, onerror) fire outside Angular's
+   * Zone.js. Wrapping resolve/reject in ngZone.run() brings the continuation
+   * back into the zone so change detection triggers automatically for any
+   * component awaiting these operations.
+   */
   private openDb(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(this.DB_NAME, 1);
@@ -37,8 +43,8 @@ export class AttachmentStoreService {
           db.createObjectStore(this.STORE);
         }
       };
-      req.onsuccess = e => resolve((e.target as IDBOpenDBRequest).result);
-      req.onerror   = () => reject(req.error);
+      req.onsuccess = e => this.ngZone.run(() => resolve((e.target as IDBOpenDBRequest).result));
+      req.onerror   = ()  => this.ngZone.run(() => reject(req.error));
     });
   }
 
@@ -54,8 +60,8 @@ export class AttachmentStoreService {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(this.STORE, 'readwrite');
       tx.objectStore(this.STORE).put(blob, id);
-      tx.oncomplete = () => resolve();
-      tx.onerror    = () => reject(tx.error);
+      tx.oncomplete = () => this.ngZone.run(() => resolve());
+      tx.onerror    = () => this.ngZone.run(() => reject(tx.error));
     });
   }
 
@@ -65,8 +71,8 @@ export class AttachmentStoreService {
     return new Promise((resolve, reject) => {
       const tx  = db.transaction(this.STORE, 'readonly');
       const req = tx.objectStore(this.STORE).get(id);
-      req.onsuccess = () => resolve((req.result as Blob) ?? null);
-      req.onerror   = () => reject(req.error);
+      req.onsuccess = () => this.ngZone.run(() => resolve((req.result as Blob) ?? null));
+      req.onerror   = () => this.ngZone.run(() => reject(req.error));
     });
   }
 
@@ -76,8 +82,8 @@ export class AttachmentStoreService {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(this.STORE, 'readwrite');
       tx.objectStore(this.STORE).delete(id);
-      tx.oncomplete = () => resolve();
-      tx.onerror    = () => reject(tx.error);
+      tx.oncomplete = () => this.ngZone.run(() => resolve());
+      tx.onerror    = () => this.ngZone.run(() => reject(tx.error));
     });
   }
 

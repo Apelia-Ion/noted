@@ -28,6 +28,7 @@ export class VideoAttachmentComponent implements OnDestroy {
 
   recording = false;
   recordTime = 0;
+  private destroyed = false;
 
   private recorder?: MediaRecorder;
   private chunks: Blob[] = [];
@@ -41,6 +42,7 @@ export class VideoAttachmentComponent implements OnDestroy {
   ) {}
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.stopRecording();
     this.urls.forEach(url => URL.revokeObjectURL(url));
   }
@@ -52,7 +54,7 @@ export class VideoAttachmentComponent implements OnDestroy {
         if (url) this.urls.set(att.id, url);
       }
     }
-    this.cdr.markForCheck();
+    if (!this.destroyed) this.cdr.detectChanges();
   }
 
   getUrl(id: string): string { return this.urls.get(id) ?? ''; }

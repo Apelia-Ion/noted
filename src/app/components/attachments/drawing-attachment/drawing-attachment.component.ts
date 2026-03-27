@@ -35,6 +35,7 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   isEraser  = false;
 
   urls = new Map<string, string>();
+  private destroyed = false;
 
   private ctx!: CanvasRenderingContext2D;
   private drawing = false;
@@ -51,6 +52,7 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.urls.forEach(url => URL.revokeObjectURL(url));
   }
 
@@ -146,7 +148,7 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
         if (url) this.urls.set(att.id, url);
       }
     }
-    this.cdr.markForCheck();
+    if (!this.destroyed) this.cdr.detectChanges();
   }
 
   getUrl(id: string): string { return this.urls.get(id) ?? ''; }

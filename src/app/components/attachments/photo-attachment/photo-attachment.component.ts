@@ -30,6 +30,7 @@ export class PhotoAttachmentComponent implements OnDestroy {
   cameraOpen = false;
   urls = new Map<string, string>();
   private stream?: MediaStream;
+  private destroyed = false;
 
   constructor(
     private store: AttachmentStoreService,
@@ -37,6 +38,7 @@ export class PhotoAttachmentComponent implements OnDestroy {
   ) {}
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.closeCamera();
     this.urls.forEach(url => URL.revokeObjectURL(url));
   }
@@ -48,7 +50,7 @@ export class PhotoAttachmentComponent implements OnDestroy {
         if (url) this.urls.set(att.id, url);
       }
     }
-    this.cdr.markForCheck();
+    if (!this.destroyed) this.cdr.detectChanges();
   }
 
   getUrl(id: string): string { return this.urls.get(id) ?? ''; }

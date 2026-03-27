@@ -1,17 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { Note } from '../../models/note.model';
+import { Note, NoteType, isMediaNote } from '../../models/note.model';
 
-/**
- * NoteCardComponent displays a single note in the home grid.
- *
- * Text notes show a truncated content preview.
- * Checklist notes show the first four items with their checked state.
- *
- * Clicking the card navigates to the editor.
- * Clicking the delete button (with stopPropagation) emits deleteNote.
- */
 @Component({
   selector: 'app-note-card',
   standalone: true,
@@ -25,16 +16,16 @@ export class NoteCardComponent {
 
   constructor(private router: Router) {}
 
-  goToEdit(): void {
-    this.router.navigate(['/note', this.note.id]);
-  }
+  goToEdit(): void { this.router.navigate(['/note', this.note.id]); }
 
   onDelete(event: MouseEvent): void {
     event.stopPropagation();
-    if (confirm('Delete this note? This cannot be undone.')) {
-      this.deleteNote.emit();
-    }
+    if (confirm('Delete this note? This cannot be undone.')) this.deleteNote.emit();
   }
+
+  get isUntitled(): boolean  { return !this.note.title.trim(); }
+  get displayTitle(): string { return this.note.title.trim() || 'Untitled'; }
+  get isMedia(): boolean     { return isMediaNote(this.note.type); }
 
   get preview(): string {
     if (!this.note.content) return '';
@@ -43,20 +34,31 @@ export class NoteCardComponent {
       : this.note.content;
   }
 
-  /** Only show up to 4 items to keep the card compact. */
-  get visibleItems() {
-    return this.note.items.slice(0, 4);
+  get visibleItems()   { return this.note.items.slice(0, 4); }
+  get hiddenCount(): number { return Math.max(0, this.note.items.length - 4); }
+
+  /** Human-readable attachment count, e.g. "3 recordings". */
+  get attachmentLabel(): string | null {
+    const count = this.note.attachments?.length ?? 0;
+    if (!count) return null;
+    const singular: Record<NoteType, string> = {
+      text: '', checklist: '',
+      audio: 'recording', video: 'video', photo: 'photo', drawing: 'drawing',
+    };
+    const plural: Record<NoteType, string> = {
+      text: '', checklist: '',
+      audio: 'recordings', video: 'videos', photo: 'photos', drawing: 'drawings',
+    };
+    const label = count === 1 ? singular[this.note.type] : plural[this.note.type];
+    return `${count} ${label}`;
   }
 
-  get hiddenCount(): number {
-    return Math.max(0, this.note.items.length - 4);
-  }
-
-  get displayTitle(): string {
-    return this.note.title.trim() || 'Untitled';
-  }
-
-  get isUntitled(): boolean {
-    return !this.note.title.trim();
+  /** Short human label for the badge. */
+  typeLabel(): string {
+    const map: Record<NoteType, string> = {
+      text: 'Text', checklist: 'List',
+      audio: 'Audio', video: 'Video', photo: 'Photo', drawing: 'Drawing',
+    };
+    return map[this.note.type] ?? this.note.type;
   }
 }

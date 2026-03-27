@@ -1,0 +1,65 @@
+<div class="attach">
+  <div class="attach__controls">
+    <label class="attach__btn attach__btn--upload">
+      <input type="file" accept="image/*" multiple (change)="onFileChange($event)" hidden />
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      Upload photo
+    </label>
+
+    @if (!cameraOpen) {
+      <button class="attach__btn" (click)="openCamera()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        Open Camera
+      </button>
+    }
+  </div>
+
+  <!-- Camera view -->
+  @if (cameraOpen) {
+    <div class="camera">
+      <video #camPreview autoplay muted playsinline class="camera__feed"></video>
+      <!-- Hidden canvas used only for snapshot capture -->
+      <canvas #snapCanvas hidden></canvas>
+      <div class="camera__actions">
+        <button class="camera__capture" (click)="capture()" title="Take photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>
+          </svg>
+        </button>
+        <button class="camera__close" (click)="closeCamera()">Close</button>
+      </div>
+    </div>
+  }
+
+  <!-- Photo grid -->
+  @if (attachments.length > 0) {
+    <div class="photo-grid">
+      @for (att of attachments; track att.id) {
+        <div class="photo-tile">
+          <img [src]="getUrl(att.id)" [alt]="att.name" class="photo-tile__img" />
+          <div class="photo-tile__overlay">
+            <button class="photo-tile__action" (click)="download(att)" title="Download">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </button>
+            <button class="photo-tile__action photo-tile__action--danger" (click)="remove(att.id)" title="Remove">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="attach__empty">No photos yet. Upload an image or use the camera.</p>
+  }
+</div>

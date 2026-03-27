@@ -3,20 +3,14 @@
 
   <div class="card__body">
     <div class="card__header">
-      <span class="card__badge card__badge--{{ note.type }}">
-        {{ note.type === 'text' ? 'Text' : 'List' }}
-      </span>
+      <span class="card__badge card__badge--{{ note.type }}">{{ typeLabel() }}</span>
     </div>
 
-    <h3 class="card__title" [class.card__title--untitled]="isUntitled">
-      {{ displayTitle }}
-    </h3>
+    <h3 class="card__title" [class.card__title--untitled]="isUntitled">{{ displayTitle }}</h3>
 
     @if (note.type === 'text') {
-      @if (preview) {
-        <p class="card__content">{{ preview }}</p>
-      }
-    } @else {
+      @if (preview) { <p class="card__content">{{ preview }}</p> }
+    } @else if (note.type === 'checklist') {
       @if (note.items.length > 0) {
         <ul class="card__items">
           @for (item of visibleItems; track item.id) {
@@ -32,12 +26,20 @@
               <span class="card__item-text">{{ item.text }}</span>
             </li>
           }
-          @if (hiddenCount > 0) {
-            <li class="card__more">+{{ hiddenCount }} more</li>
-          }
+          @if (hiddenCount > 0) { <li class="card__more">+{{ hiddenCount }} more</li> }
         </ul>
       } @else {
         <p class="card__empty-list">No items yet</p>
+      }
+    } @else {
+      @if (preview) { <p class="card__content">{{ preview }}</p> }
+      @if (attachmentLabel) {
+        <div class="card__attach-count">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+          {{ attachmentLabel }}
+        </div>
       }
     }
   </div>
@@ -49,8 +51,7 @@
     <button class="card__delete" (click)="onDelete($event)" title="Delete note" aria-label="Delete note">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="3 6 5 6 21 6"/>
-        <path d="M19 6l-1 14H6L5 6"/>
-        <path d="M10 11v6M14 11v6"/>
+        <path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>
         <path d="M9 6V4h6v2"/>
       </svg>
     </button>

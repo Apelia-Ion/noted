@@ -42,6 +42,8 @@
               (click)="setFilter('text')">Text</button>
       <button class="filter-btn" [class.filter-btn--active]="filterType === 'checklist'"
               (click)="setFilter('checklist')">Lists</button>
+      <button class="filter-btn" [class.filter-btn--active]="filterType === 'media'"
+              (click)="setFilter('media')">Media</button>
     </div>
 
     <!-- Sort -->

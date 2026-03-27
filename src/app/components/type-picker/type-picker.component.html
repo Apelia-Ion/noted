@@ -1,39 +1,78 @@
 <div class="overlay" (click)="cancel.emit()">
   <div class="modal" (click)="$event.stopPropagation()">
     <h2 class="modal__title">New note</h2>
-    <p class="modal__sub">Choose a note type to get started</p>
+    <p class="modal__sub">Choose a type</p>
 
-    <div class="modal__options">
-      <button class="option option--text" (click)="select('text')">
-        <span class="option__icon">
-          <!-- document lines icon -->
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="10" fill="var(--primary-light)"/>
-            <path d="M10 11h12M10 16h12M10 21h7"
-                  stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
+    <div class="modal__grid">
+
+      <!-- Text -->
+      <button class="option" (click)="select('text')">
+        <span class="option__icon option__icon--text">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16M4 12h16M4 18h10"/>
           </svg>
         </span>
-        <span class="option__label">Text note</span>
-        <span class="option__desc">Write anything — thoughts, ideas, docs</span>
+        <span class="option__label">Text</span>
       </button>
 
-      <button class="option option--checklist" (click)="select('checklist')">
-        <span class="option__icon">
-          <!-- checklist icon -->
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <rect width="32" height="32" rx="10" fill="var(--teal-light)"/>
-            <path d="M10 12l3 3 5-6" stroke="var(--teal)" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M20 12h3M20 17h3M10 21h13"
-                  stroke="var(--teal)" stroke-width="2" stroke-linecap="round"/>
-            <path d="M10 17l1.5 1.5L14 15"
-                  stroke="var(--teal)" stroke-width="2"
-                  stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Checklist -->
+      <button class="option" (click)="select('checklist')">
+        <span class="option__icon option__icon--checklist">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
         </span>
         <span class="option__label">Checklist</span>
-        <span class="option__desc">To-do lists, shopping lists, tasks</span>
       </button>
+
+      <!-- Audio -->
+      <button class="option" (click)="select('audio')">
+        <span class="option__icon option__icon--audio">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8"  y1="23" x2="16" y2="23"/>
+          </svg>
+        </span>
+        <span class="option__label">Audio</span>
+      </button>
+
+      <!-- Video -->
+      <button class="option" (click)="select('video')">
+        <span class="option__icon option__icon--video">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+        </span>
+        <span class="option__label">Video</span>
+      </button>
+
+      <!-- Photo -->
+      <button class="option" (click)="select('photo')">
+        <span class="option__icon option__icon--photo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </span>
+        <span class="option__label">Photo</span>
+      </button>
+
+      <!-- Drawing -->
+      <button class="option" (click)="select('drawing')">
+        <span class="option__icon option__icon--drawing">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+            <path d="M2 2l7.586 7.586"/>
+            <circle cx="11" cy="11" r="2"/>
+          </svg>
+        </span>
+        <span class="option__label">Drawing</span>
+      </button>
+
     </div>
 
     <button class="modal__cancel" (click)="cancel.emit()">Cancel</button>

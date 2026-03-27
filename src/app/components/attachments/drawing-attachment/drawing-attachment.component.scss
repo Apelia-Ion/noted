@@ -1,0 +1,150 @@
+@use '../attachment-shared' as *;
+
+.drawing {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  &__colors {
+    display: flex;
+    gap: 4px;
+  }
+
+  &__sizes {
+    display: flex;
+    gap: 4px;
+    border-left: 1px solid var(--border);
+    padding-left: 10px;
+  }
+
+  &__section-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  &__canvas {
+    width: 100%;
+    height: 320px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: crosshair;
+    touch-action: none; // prevent scroll while drawing on touch
+    display: block;
+  }
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition);
+  padding: 0;
+
+  &--active { border-color: var(--primary); transform: scale(1.25); }
+  &:hover:not(.swatch--active) { transform: scale(1.15); }
+
+  // White swatch needs a border to be visible
+  &[style*="ffffff"] { border-color: var(--border) !important; }
+  &[style*="ffffff"].swatch--active { border-color: var(--primary) !important; }
+}
+
+.size-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), border-color var(--transition);
+
+  &--active { background: var(--primary-light); border-color: var(--primary); }
+  &:hover:not(.size-btn--active) { background: var(--bg); }
+}
+
+.size-dot {
+  border-radius: 50%;
+  background: var(--text);
+  display: block;
+  min-width: 6px;
+  min-height: 6px;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-btn);
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--transition);
+
+  &:hover { border-color: var(--text); color: var(--text); }
+  &--active { background: #fff7ed; border-color: #f97316; color: #f97316; }
+  &--save { background: var(--primary); border-color: var(--primary); color: white; margin-left: auto;
+    &:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: white; }
+  }
+}
+
+// Photo grid + tiles (shared with photo component — duplicated for encapsulation)
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.photo-tile {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  background: var(--border);
+  border: 1px solid var(--border);
+
+  &__img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  &__overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    opacity: 0; transition: opacity var(--transition);
+  }
+
+  &:hover &__overlay { opacity: 1; }
+
+  &__action {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+    &:hover { background: rgba(255,255,255,0.35); }
+    &--danger:hover { background: rgba(239,68,68,0.7); }
+  }
+}

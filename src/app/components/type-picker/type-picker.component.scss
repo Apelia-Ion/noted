@@ -13,29 +13,29 @@
 .modal {
   background: var(--surface);
   border-radius: 18px;
-  padding: 32px;
-  width: min(420px, calc(100vw - 32px));
+  padding: 28px;
+  width: min(440px, calc(100vw - 32px));
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
   animation: slide-up 0.2s ease;
 
   &__title {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
 
   &__sub {
-    font-size: 0.875rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
-  &__options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   &__cancel {
@@ -48,57 +48,54 @@
     font-size: 0.875rem;
     cursor: pointer;
     transition: background var(--transition), color var(--transition);
-
-    &:hover {
-      background: var(--bg);
-      color: var(--text);
-    }
+    &:hover { background: var(--bg); color: var(--text); }
   }
 }
+
+// ── Option buttons ────────────────────────────────────────────────────────
 
 .option {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 16px;
-  border: 2px solid var(--border);
+  gap: 8px;
+  padding: 16px 8px 12px;
+  border: 1.5px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
   cursor: pointer;
-  text-align: left;
   transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
 
-  &--text:hover  { border-color: var(--primary); }
-  &--checklist:hover { border-color: var(--teal); }
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  &__icon { flex-shrink: 0; }
+    &--text      { background: var(--primary-light);  color: var(--primary); }
+    &--checklist { background: var(--teal-light);      color: var(--teal);   }
+    &--audio     { background: #fdf4ff;                color: #a855f7;       }
+    &--video     { background: #fff7ed;                color: #f97316;       }
+    &--photo     { background: #ecfdf5;                color: #10b981;       }
+    &--drawing   { background: #fef2f2;                color: #ef4444;       }
+  }
 
   &__label {
-    display: block;
+    font-size: 0.78rem;
     font-weight: 600;
-    font-size: 0.95rem;
     color: var(--text);
-    margin-bottom: 2px;
   }
 
-  &__desc {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
+  &:hover .option__icon--text      { border-color: var(--primary); }
+  &:hover { border-color: #c7d2fe; }
 }
 
-@keyframes fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+@keyframes fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }

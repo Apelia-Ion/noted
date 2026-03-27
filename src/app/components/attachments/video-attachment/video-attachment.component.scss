@@ -1,0 +1,35 @@
+@use '../attachment-shared' as *;
+
+.live-preview {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+
+  &__video {
+    width: 100%;
+    max-height: 280px;
+    display: block;
+    object-fit: cover;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(239,68,68,0.9);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+  }
+}
+
+.attach__video-player {
+  width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  background: #000;
+}

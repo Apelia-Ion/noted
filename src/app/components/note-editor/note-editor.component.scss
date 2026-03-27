@@ -49,15 +49,12 @@
   letter-spacing: 0.02em;
   margin-right: auto; // push save button to the right
 
-  &--text {
-    background: var(--primary-light);
-    color: var(--primary);
-  }
-
-  &--checklist {
-    background: var(--teal-light);
-    color: var(--teal);
-  }
+  &--text      { background: var(--primary-light); color: var(--primary); }
+  &--checklist { background: var(--teal-light);    color: var(--teal); }
+  &--audio     { background: #fdf4ff; color: #a855f7; }
+  &--video     { background: #fff7ed; color: #f97316; }
+  &--photo     { background: #ecfdf5; color: #10b981; }
+  &--drawing   { background: #fef2f2; color: #ef4444; }
 }
 
 .topbar__save {
@@ -108,6 +105,19 @@
   &:focus { border-bottom-color: var(--primary); }
 }
 
+.editor__attachment-section {
+  margin-top: 8px;
+}
+
+.editor__attachment-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
 .editor__textarea {
   width: 100%;
   flex: 1;
@@ -122,6 +132,8 @@
   font-family: inherit;
 
   &::placeholder { color: #d1d5db; }
+
+  &--short { min-height: 100px; margin-bottom: 24px; }
 }
 
 // ── Checklist ─────────────────────────────────────────────────────────────

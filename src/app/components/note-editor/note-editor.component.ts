@@ -144,6 +144,10 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
     // Push a new array reference so child @Input setter fires
     this.note.attachments = [...this.note.attachments, meta];
     this.sessionAddedIds.push(id);
+
+    // Auto-save so the attachment is persisted immediately (works for new and existing notes)
+    this.savedSuccessfully = true;
+    this.notesService.save(this.note);
   }
 
   onAttachmentRemoved(id: string): void {

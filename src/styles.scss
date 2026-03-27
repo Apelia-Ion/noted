@@ -1,1 +1,57 @@
-/* You can add global styles to this file, and also import other style files */
+/* ── Design tokens ─────────────────────────────────────────────────────── */
+:root {
+  --bg:             #f8fafc;
+  --surface:        #ffffff;
+  --border:         #e2e8f0;
+
+  --primary:        #6366f1;   /* indigo – used for text notes & primary actions */
+  --primary-hover:  #4f46e5;
+  --primary-light:  #eef2ff;
+
+  --teal:           #0d9488;   /* teal – used for checklist notes */
+  --teal-light:     #f0fdfa;
+
+  --text:           #0f172a;
+  --text-muted:     #94a3b8;
+
+  --radius-card:    14px;
+  --radius-btn:     8px;
+
+  --shadow:         0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-hover:   0 8px 24px rgba(0,0,0,0.1);
+
+  --transition:     0.18s ease;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+html { font-size: 16px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}

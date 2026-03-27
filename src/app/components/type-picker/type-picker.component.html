@@ -1,0 +1,41 @@
+<div class="overlay" (click)="cancel.emit()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2 class="modal__title">New note</h2>
+    <p class="modal__sub">Choose a note type to get started</p>
+
+    <div class="modal__options">
+      <button class="option option--text" (click)="select('text')">
+        <span class="option__icon">
+          <!-- document lines icon -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="10" fill="var(--primary-light)"/>
+            <path d="M10 11h12M10 16h12M10 21h7"
+                  stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="option__label">Text note</span>
+        <span class="option__desc">Write anything — thoughts, ideas, docs</span>
+      </button>
+
+      <button class="option option--checklist" (click)="select('checklist')">
+        <span class="option__icon">
+          <!-- checklist icon -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="10" fill="var(--teal-light)"/>
+            <path d="M10 12l3 3 5-6" stroke="var(--teal)" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 12h3M20 17h3M10 21h13"
+                  stroke="var(--teal)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M10 17l1.5 1.5L14 15"
+                  stroke="var(--teal)" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="option__label">Checklist</span>
+        <span class="option__desc">To-do lists, shopping lists, tasks</span>
+      </button>
+    </div>
+
+    <button class="modal__cancel" (click)="cancel.emit()">Cancel</button>
+  </div>
+</div>

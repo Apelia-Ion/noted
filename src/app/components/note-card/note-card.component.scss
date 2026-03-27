@@ -1,0 +1,190 @@
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  outline: none;
+  min-height: 120px;
+
+  &:hover, &:focus-visible {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  &--text:hover, &--text:focus-visible {
+    border-color: rgba(99, 102, 241, 0.4);
+  }
+
+  &--checklist:hover, &--checklist:focus-visible {
+    border-color: rgba(13, 148, 136, 0.4);
+  }
+
+  // ── Header ──────────────────────────────────────────────────────────────
+
+  &__header {
+    margin-bottom: 8px;
+  }
+
+  &__badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 99px;
+
+    &--text {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    &--checklist {
+      background: var(--teal-light);
+      color: var(--teal);
+    }
+  }
+
+  // ── Title ────────────────────────────────────────────────────────────────
+
+  &__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.35;
+    // Clamp to two lines
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    &--untitled {
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 400;
+    }
+  }
+
+  // ── Body ─────────────────────────────────────────────────────────────────
+
+  &__body {
+    flex: 1;
+  }
+
+  &__content {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    // Clamp to three lines
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: pre-wrap;
+  }
+
+  &__empty-list {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  // ── Checklist items ───────────────────────────────────────────────────────
+
+  &__items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text);
+
+    &--checked &-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+  }
+
+  &__checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &--checked {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: white;
+    }
+  }
+
+  &__item-text {
+    // Single line ellipsis
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__more {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding-left: 24px;
+  }
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  &__date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  &__delete {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition), background var(--transition), opacity var(--transition);
+
+    &:hover {
+      color: #ef4444;
+      background: #fef2f2;
+    }
+  }
+
+  // Show delete on card hover/focus
+  &:hover &__delete,
+  &:focus-within &__delete {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,138 @@
+<div class="editor">
+
+  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+  <div class="editor__topbar">
+    <button class="topbar__back" (click)="goBack()" title="Back to notes">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back
+    </button>
+
+    <span class="topbar__badge topbar__badge--{{ note.type }}">
+      @if (note.type === 'text') {
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h10"/>
+        </svg>
+        Text note
+      } @else {
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+        Checklist
+      }
+    </span>
+
+    <button class="topbar__save" (click)="save()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      Save
+    </button>
+  </div>
+
+  <!-- ── Editor body ─────────────────────────────────────────────────────── -->
+  <div class="editor__body">
+
+    <!-- Title -->
+    <input
+      class="editor__title"
+      type="text"
+      placeholder="Title"
+      [(ngModel)]="note.title"
+      maxlength="200"
+      autocomplete="off"
+    />
+
+    <!-- ── Text content ──────────────────────────────────────────────────── -->
+    @if (note.type === 'text') {
+      <textarea
+        class="editor__textarea"
+        placeholder="Start writing…"
+        [(ngModel)]="note.content"
+        autofocus
+      ></textarea>
+    }
+
+    <!-- ── Checklist content ─────────────────────────────────────────────── -->
+    @if (note.type === 'checklist') {
+      <div class="checklist">
+
+        @if (note.items.length > 0) {
+          <p class="checklist__progress">
+            {{ checkedCount }} / {{ note.items.length }} done
+          </p>
+        }
+
+        <ul class="checklist__list">
+          @for (item of note.items; track item.id; let i = $index) {
+            <li class="checklist__item">
+              <label class="checklist__check-wrap" [for]="'item-' + item.id">
+                <input
+                  type="checkbox"
+                  [id]="'item-' + item.id"
+                  class="checklist__checkbox"
+                  [(ngModel)]="item.checked"
+                />
+                <span class="checklist__check-box" [class.checklist__check-box--checked]="item.checked">
+                  @if (item.checked) {
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-6" stroke="white" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                </span>
+              </label>
+
+              <input
+                type="text"
+                class="item-input"
+                [class.item-input--checked]="item.checked"
+                [(ngModel)]="item.text"
+                placeholder="Item…"
+                (keydown)="onItemKeydown($event, i)"
+                autocomplete="off"
+              />
+
+              <button class="checklist__remove"
+                      (click)="removeItem(i)"
+                      title="Remove item"
+                      [disabled]="note.items.length === 1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <button class="checklist__add" (click)="addItemAfter()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Add item
+        </button>
+      </div>
+    }
+
+    <!-- ── Meta ──────────────────────────────────────────────────────────── -->
+    <div class="editor__meta">
+      <span>
+        <strong>Created</strong>
+        {{ note.createdAt | date:'MMM d, y · h:mm a' }}
+      </span>
+      @if (!isNew) {
+        <span>
+          <strong>Modified</strong>
+          {{ note.updatedAt | date:'MMM d, y · h:mm a' }}
+        </span>
+      }
+    </div>
+
+  </div>
+</div>

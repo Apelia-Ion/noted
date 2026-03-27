@@ -1,27 +1,71 @@
-# Noted
+# Noted — Notes App (Hackathon Task 1)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.1.
+A web application for writing notes and shopping lists, built with **Angular 17** (standalone components).
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Setup & run
 
-## Code scaffolding
+**Prerequisites:** Node.js ≥ 18, Angular CLI 17
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```bash
+# install dependencies
+npm install
 
-## Build
+# start dev server (http://localhost:4200)
+npm start
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+# production build
+npm run build
+```
 
-## Running unit tests
+---
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Features (Task 1)
 
-## Running end-to-end tests
+| Feature | Detail |
+|---|---|
+| **Two note types** | Text notes and Checklist notes |
+| **Homepage grid** | Responsive card grid, auto-adjusts columns |
+| **Create** | FAB → type picker modal → editor |
+| **Edit** | Click any card to open the editor |
+| **Delete** | Hover a card to reveal the trash icon; confirm dialog |
+| **Checklist UX** | Check/uncheck items, Enter adds a new item below, Backspace on empty item removes it |
+| **Search** | Real-time search across title, content, and checklist item text |
+| **Filter** | All / Text / Lists tabs |
+| **Sort** | Newest first, Oldest first, Last modified, Title A–Z |
+| **Persistence** | All notes saved to `localStorage`; survive page refresh |
+| **Dates** | Created and modified timestamps shown in editor and on cards |
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+---
 
-## Further help
+## Architecture
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```
+src/app/
+  models/
+    note.model.ts            ← Note, ChecklistItem, NoteType
+  services/
+    notes.service.ts         ← BehaviorSubject, CRUD, localStorage, filter/sort
+  components/
+    type-picker/             ← modal overlay to pick note type
+    note-card/               ← card shown in the grid
+    home/                    ← page: grid + toolbar + FAB
+    note-editor/             ← create / edit view
+```
+
+**Component data flow**
+- `NotesService` owns state via `BehaviorSubject<Note[]>`.
+- `HomeComponent` subscribes and re-runs `applyFilters()` on every change.
+- `NoteEditorComponent` deep-copies the note on load; only writes back on explicit Save.
+- No external UI library — all styles are hand-written SCSS using CSS custom properties.
+
+---
+
+## Trade-offs & known limitations
+
+- **No undo/redo** — discarding unsaved changes requires navigating back without saving.
+- **No drag-to-reorder** for checklist items (out of scope for Task 1).
+- **localStorage only** — data is per-browser, not synced across devices.
+- **No SSR hydration for localStorage** — the service guards against `window` being undefined, but the app is designed to run client-side.
+- `window.confirm()` is used for delete confirmation (simple, but not styleable).

@@ -1,0 +1,267 @@
+.editor {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+// ── Top bar ───────────────────────────────────────────────────────────────
+
+.editor__topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar__back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-btn);
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition);
+
+  &:hover {
+    border-color: var(--text);
+    color: var(--text);
+  }
+}
+
+.topbar__badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-right: auto; // push save button to the right
+
+  &--text {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  &--checklist {
+    background: var(--teal-light);
+    color: var(--teal);
+  }
+}
+
+.topbar__save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+
+  &:hover  { background: var(--primary-hover); }
+  &:active { transform: scale(0.97); }
+}
+
+// ── Editor body ───────────────────────────────────────────────────────────
+
+.editor__body {
+  flex: 1;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.editor__title {
+  width: 100%;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text);
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 0 16px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 24px;
+  transition: border-color var(--transition);
+
+  &::placeholder { color: #d1d5db; }
+  &:focus { border-bottom-color: var(--primary); }
+}
+
+.editor__textarea {
+  width: 100%;
+  flex: 1;
+  min-height: 400px;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--text);
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: none;
+  font-family: inherit;
+
+  &::placeholder { color: #d1d5db; }
+}
+
+// ── Checklist ─────────────────────────────────────────────────────────────
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  &__progress {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  &__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background var(--transition);
+
+    &:hover {
+      background: #f8fafc;
+
+      .checklist__remove { opacity: 1; }
+    }
+  }
+
+  &__check-wrap {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  // Hide the native checkbox; style the custom box instead
+  &__checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  &__check-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), border-color var(--transition);
+
+    &--checked {
+      background: var(--teal);
+      border-color: var(--teal);
+    }
+  }
+
+  &__remove {
+    opacity: 0;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 3px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition), opacity var(--transition);
+
+    &:hover { color: #ef4444; }
+    &:disabled { visibility: hidden; }
+  }
+
+  &__add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: none;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    align-self: flex-start;
+
+    &:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+  }
+}
+
+// Item text input
+.item-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--text);
+  font-family: inherit;
+  line-height: 1.5;
+
+  &::placeholder { color: #d1d5db; }
+
+  &--checked {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+}
+
+// ── Meta ─────────────────────────────────────────────────────────────────
+
+.editor__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+
+  strong {
+    font-weight: 600;
+    margin-right: 4px;
+  }
+}

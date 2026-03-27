@@ -1,0 +1,106 @@
+<div class="home">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="home__header">
+    <div class="home__brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <rect width="30" height="30" rx="9" fill="var(--primary)"/>
+        <path d="M9 10h12M9 15h12M9 20h7"
+              stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <span class="home__logo">noted</span>
+    </div>
+
+    @if (totalCount > 0) {
+      <span class="home__count">{{ totalCount }} {{ totalCount === 1 ? 'note' : 'notes' }}</span>
+    }
+  </header>
+
+  <!-- ── Toolbar ────────────────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <!-- Search -->
+    <div class="toolbar__search">
+      <svg class="toolbar__search-icon" width="16" height="16" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        class="toolbar__search-input"
+        type="search"
+        placeholder="Search notes…"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="applyFilters()"
+        aria-label="Search notes"
+      />
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="toolbar__filters" role="group" aria-label="Filter by type">
+      <button class="filter-btn" [class.filter-btn--active]="filterType === 'all'"
+              (click)="setFilter('all')">All</button>
+      <button class="filter-btn" [class.filter-btn--active]="filterType === 'text'"
+              (click)="setFilter('text')">Text</button>
+      <button class="filter-btn" [class.filter-btn--active]="filterType === 'checklist'"
+              (click)="setFilter('checklist')">Lists</button>
+    </div>
+
+    <!-- Sort -->
+    <div class="toolbar__sort">
+      <label class="sr-only" for="sort-select">Sort by</label>
+      <select id="sort-select" class="sort-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="modified">Last modified</option>
+        <option value="title">Title A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Notes grid ─────────────────────────────────────────────────────── -->
+  @if (filteredNotes.length > 0) {
+    <main class="notes-grid">
+      @for (note of filteredNotes; track note.id) {
+        <app-note-card [note]="note" (deleteNote)="onDeleteNote(note.id)" />
+      }
+    </main>
+  } @else {
+    <div class="empty-state">
+      @if (allNotes.length === 0) {
+        <!-- Truly empty -->
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+          <rect width="72" height="72" rx="18" fill="#f1f5f9"/>
+          <path d="M22 25h28M22 35h28M22 45h18"
+                stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <h2 class="empty-state__title">No notes yet</h2>
+        <p class="empty-state__sub">Hit <strong>+</strong> to create your first note</p>
+      } @else {
+        <!-- Search/filter produced no results -->
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+          <rect width="72" height="72" rx="18" fill="#f1f5f9"/>
+          <circle cx="34" cy="34" r="14" stroke="#cbd5e1" stroke-width="3"/>
+          <path d="m44 44 8 8" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <h2 class="empty-state__title">No matches</h2>
+        <p class="empty-state__sub">Try a different search term or filter</p>
+      }
+    </div>
+  }
+
+  <!-- ── FAB ────────────────────────────────────────────────────────────── -->
+  <button class="fab" (click)="showTypePicker = true" aria-label="New note" title="New note">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </button>
+
+  <!-- ── Type picker modal ──────────────────────────────────────────────── -->
+  @if (showTypePicker) {
+    <app-type-picker
+      (typeSelected)="onTypeSelected($event)"
+      (cancel)="showTypePicker = false"
+    />
+  }
+
+</div>

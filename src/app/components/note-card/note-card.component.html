@@ -1,0 +1,58 @@
+<article class="card" [class]="'card--' + note.type" (click)="goToEdit()" role="button" tabindex="0"
+         (keydown.enter)="goToEdit()">
+
+  <div class="card__body">
+    <div class="card__header">
+      <span class="card__badge card__badge--{{ note.type }}">
+        {{ note.type === 'text' ? 'Text' : 'List' }}
+      </span>
+    </div>
+
+    <h3 class="card__title" [class.card__title--untitled]="isUntitled">
+      {{ displayTitle }}
+    </h3>
+
+    @if (note.type === 'text') {
+      @if (preview) {
+        <p class="card__content">{{ preview }}</p>
+      }
+    } @else {
+      @if (note.items.length > 0) {
+        <ul class="card__items">
+          @for (item of visibleItems; track item.id) {
+            <li class="card__item" [class.card__item--checked]="item.checked">
+              <span class="card__checkbox" [class.card__checkbox--checked]="item.checked">
+                @if (item.checked) {
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 5l2.5 2.5L8 3" stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                }
+              </span>
+              <span class="card__item-text">{{ item.text }}</span>
+            </li>
+          }
+          @if (hiddenCount > 0) {
+            <li class="card__more">+{{ hiddenCount }} more</li>
+          }
+        </ul>
+      } @else {
+        <p class="card__empty-list">No items yet</p>
+      }
+    }
+  </div>
+
+  <footer class="card__footer">
+    <time class="card__date" [title]="note.updatedAt | date:'full'">
+      {{ note.updatedAt | date:'MMM d, y' }}
+    </time>
+    <button class="card__delete" (click)="onDelete($event)" title="Delete note" aria-label="Delete note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4h6v2"/>
+      </svg>
+    </button>
+  </footer>
+</article>

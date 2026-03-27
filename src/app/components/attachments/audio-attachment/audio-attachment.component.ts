@@ -1,5 +1,5 @@
 import {
-  Component, Input, Output, EventEmitter, OnDestroy, ChangeDetectorRef
+  Component, Input, Output, EventEmitter, OnDestroy, ChangeDetectorRef, NgZone
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Attachment } from '../../../models/note.model';
@@ -39,6 +39,7 @@ export class AudioAttachmentComponent implements OnDestroy {
   constructor(
     private store: AttachmentStoreService,
     private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {}
 
   ngOnDestroy(): void {
@@ -85,7 +86,7 @@ export class AudioAttachmentComponent implements OnDestroy {
       this.recorder  = new MediaRecorder(this.stream, { mimeType });
       this.chunks    = [];
       this.recorder.ondataavailable = e => { if (e.data.size > 0) this.chunks.push(e.data); };
-      this.recorder.onstop = () => this.finalise(mimeType);
+      this.recorder.onstop = () => this.ngZone.run(() => this.finalise(mimeType));
       this.recorder.start(100);
       this.recording  = true;
       this.recordTime = 0;

@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, OnDestroy, AfterViewInit,
-  ViewChild, ElementRef, ChangeDetectorRef, HostListener
+  ViewChild, ElementRef, ChangeDetectorRef, HostListener, NgZone
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -45,6 +45,7 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   constructor(
     private store: AttachmentStoreService,
     private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {}
 
   ngAfterViewInit(): void {
@@ -133,9 +134,11 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   saveDrawing(): void {
     this.canvasRef.nativeElement.toBlob(blob => {
       if (!blob) return;
-      const name = `drawing-${Date.now()}.png`;
-      this.attachmentAdded.emit({ blob, name, mimeType: 'image/png' });
-      this.fillWhite();    // reset canvas for next drawing
+      this.ngZone.run(() => {
+        const name = `drawing-${Date.now()}.png`;
+        this.attachmentAdded.emit({ blob, name, mimeType: 'image/png' });
+        this.fillWhite();
+      });
     }, 'image/png');
   }
 

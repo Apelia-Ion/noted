@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, OnDestroy,
-  ViewChild, ElementRef, ChangeDetectorRef
+  ViewChild, ElementRef, ChangeDetectorRef, NgZone
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Attachment } from '../../../models/note.model';
@@ -35,6 +35,7 @@ export class PhotoAttachmentComponent implements OnDestroy {
   constructor(
     private store: AttachmentStoreService,
     private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
   ) {}
 
   ngOnDestroy(): void {
@@ -93,8 +94,10 @@ export class PhotoAttachmentComponent implements OnDestroy {
     canvas.getContext('2d')!.drawImage(video, 0, 0);
     canvas.toBlob(blob => {
       if (!blob) return;
-      const name = `photo-${Date.now()}.jpg`;
-      this.attachmentAdded.emit({ blob, name, mimeType: 'image/jpeg' });
+      this.ngZone.run(() => {
+        const name = `photo-${Date.now()}.jpg`;
+        this.attachmentAdded.emit({ blob, name, mimeType: 'image/jpeg' });
+      });
     }, 'image/jpeg', 0.92);
   }
 

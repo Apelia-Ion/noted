@@ -36,6 +36,8 @@ export class NotesService {
 
   // ── Reads ─────────────────────────────────────────────────────────────────
 
+  get allNotes(): Note[] { return this._notes$.value; }
+
   getNote(id: string): Note | undefined {
     return this._notes$.value.find(n => n.id === id);
   }

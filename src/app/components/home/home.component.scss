@@ -27,9 +27,57 @@
   letter-spacing: -0.02em;
 }
 
+.home__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .home__count {
   font-size: 0.82rem;
   color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-btn);
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: background var(--transition), opacity var(--transition);
+
+  &:hover:not(:disabled) { background: var(--primary-hover); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &--outline {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+
+    &:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+  }
+}
+
+.import-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  z-index: 100;
+  animation: fade-in 0.2s ease;
+  white-space: nowrap;
 }
 
 // ── Toolbar ────────────────────────────────────────────────────────────────

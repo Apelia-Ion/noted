@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 
 import { Note, NoteType } from '../../models/note.model';
 import { NotesService, FilterOption, SortOption } from '../../services/notes.service';
+import { ExportImportService } from '../../services/export-import.service';
 import { NoteCardComponent } from '../note-card/note-card.component';
 import { TypePickerComponent } from '../type-picker/type-picker.component';
 
@@ -35,11 +36,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   sortBy: SortOption = 'newest';
   showTypePicker = false;
 
+  importStatus: string | null = null;
+  exporting = false;
+  private importStatusTimer?: ReturnType<typeof setTimeout>;
   private sub?: Subscription;
 
   constructor(
     private notesService: NotesService,
     private router: Router,
+    private exportImport: ExportImportService,
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    clearTimeout(this.importStatusTimer);
   }
 
   applyFilters(): void {
@@ -78,5 +84,39 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   get totalCount(): number {
     return this.allNotes.length;
+  }
+
+  // ── Export / Import ───────────────────────────────────────────────────────
+
+  async onExport(): Promise<void> {
+    this.exporting = true;
+    try {
+      await this.exportImport.exportAll();
+    } finally {
+      this.exporting = false;
+    }
+  }
+
+  async onImport(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    (event.target as HTMLInputElement).value = '';
+    if (!file) return;
+
+    try {
+      const result = await this.exportImport.importFile(file);
+      const parts: string[] = [];
+      if (result.imported) parts.push(`${result.imported} imported`);
+      if (result.updated)  parts.push(`${result.updated} updated`);
+      if (result.skipped)  parts.push(`${result.skipped} skipped`);
+      this.showStatus(parts.length ? parts.join(', ') : 'Nothing to import');
+    } catch (err) {
+      this.showStatus((err as Error).message);
+    }
+  }
+
+  private showStatus(msg: string): void {
+    this.importStatus = msg;
+    clearTimeout(this.importStatusTimer);
+    this.importStatusTimer = setTimeout(() => { this.importStatus = null; }, 4000);
   }
 }

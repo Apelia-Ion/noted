@@ -38,6 +38,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   importStatus: string | null = null;
   exporting = false;
+  showExportPicker = false;
+  exportSelection = new Set<string>();
   private importStatusTimer?: ReturnType<typeof setTimeout>;
   private sub?: Subscription;
 
@@ -88,10 +90,35 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   // ── Export / Import ───────────────────────────────────────────────────────
 
-  async onExport(): Promise<void> {
+  openExportPicker(): void {
+    // Pre-select all notes
+    this.exportSelection = new Set(this.allNotes.map(n => n.id));
+    this.showExportPicker = true;
+  }
+
+  toggleExportNote(id: string): void {
+    if (this.exportSelection.has(id)) {
+      this.exportSelection.delete(id);
+    } else {
+      this.exportSelection.add(id);
+    }
+    // trigger change detection on the Set
+    this.exportSelection = new Set(this.exportSelection);
+  }
+
+  toggleSelectAll(): void {
+    if (this.exportSelection.size === this.allNotes.length) {
+      this.exportSelection = new Set();
+    } else {
+      this.exportSelection = new Set(this.allNotes.map(n => n.id));
+    }
+  }
+
+  async confirmExport(): Promise<void> {
+    this.showExportPicker = false;
     this.exporting = true;
     try {
-      await this.exportImport.exportAll();
+      await this.exportImport.exportSelected([...this.exportSelection]);
     } finally {
       this.exporting = false;
     }

@@ -33,8 +33,8 @@ export class ExportImportService {
 
   // ── Export ────────────────────────────────────────────────────────────────
 
-  async exportAll(): Promise<void> {
-    const notes = this.notesService.allNotes;
+  async exportSelected(ids: string[]): Promise<void> {
+    const notes = this.notesService.allNotes.filter(n => ids.includes(n.id));
 
     const exportedNotes: ExportedNote[] = await Promise.all(
       notes.map(async note => {

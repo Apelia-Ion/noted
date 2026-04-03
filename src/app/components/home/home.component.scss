@@ -249,6 +249,165 @@
   &:active { transform: scale(0.96); }
 }
 
+// ── Export picker modal ────────────────────────────────────────────────────
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fade-in 0.15s ease;
+}
+
+.export-picker {
+  background: var(--surface);
+  border-radius: 16px;
+  width: min(480px, 92vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__select-all {
+    font-size: 0.8rem;
+    color: var(--primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    font-weight: 500;
+    &:hover { text-decoration: underline; }
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background var(--transition);
+    user-select: none;
+
+    &:hover { background: var(--primary-light, #eef2ff); }
+
+    &--selected { background: var(--primary-light, #eef2ff); }
+  }
+
+  &__check {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+
+    .export-picker__item--selected & {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+  }
+
+  &__type-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 99px;
+    flex-shrink: 0;
+    text-transform: capitalize;
+    background: #e2e8f0;
+    color: #475569;
+
+    &--audio   { background: #fce7f3; color: #be185d; }
+    &--video   { background: #ede9fe; color: #6d28d9; }
+    &--photo   { background: #dcfce7; color: #15803d; }
+    &--drawing { background: #ffedd5; color: #c2410c; }
+    &--text    { background: #dbeafe; color: #1d4ed8; }
+    &--checklist { background: #f0fdf4; color: #16a34a; }
+  }
+
+  &__note-title {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__note-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  &__cancel {
+    padding: 8px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-btn);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color var(--transition), color var(--transition);
+    &:hover { border-color: var(--text-muted); color: var(--text); }
+  }
+
+  &__confirm {
+    padding: 8px 18px;
+    border: none;
+    border-radius: var(--radius-btn);
+    background: var(--primary);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), opacity var(--transition);
+    &:hover:not(:disabled) { background: var(--primary-hover); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+}
+
 // ── Utility ────────────────────────────────────────────────────────────────
 
 .sr-only {

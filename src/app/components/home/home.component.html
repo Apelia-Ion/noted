@@ -17,8 +17,8 @@
       }
 
       <!-- Export -->
-      <button class="header-btn" (click)="onExport()" [disabled]="exporting || totalCount === 0"
-              title="Export all notes" aria-label="Export all notes">
+      <button class="header-btn" (click)="openExportPicker()" [disabled]="exporting || totalCount === 0"
+              title="Export notes" aria-label="Export notes">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -133,6 +133,55 @@
       (typeSelected)="onTypeSelected($event)"
       (cancel)="showTypePicker = false"
     />
+  }
+
+  <!-- ── Export picker modal ────────────────────────────────────────────── -->
+  @if (showExportPicker) {
+    <div class="modal-backdrop" (click)="showExportPicker = false">
+      <div class="export-picker" (click)="$event.stopPropagation()">
+        <div class="export-picker__header">
+          <h2 class="export-picker__title">Export notes</h2>
+          <button class="export-picker__select-all" (click)="toggleSelectAll()">
+            {{ exportSelection.size === allNotes.length ? 'Deselect all' : 'Select all' }}
+          </button>
+        </div>
+
+        <ul class="export-picker__list">
+          @for (note of allNotes; track note.id) {
+            <li class="export-picker__item"
+                [class.export-picker__item--selected]="exportSelection.has(note.id)"
+                (click)="toggleExportNote(note.id)">
+              <span class="export-picker__check">
+                @if (exportSelection.has(note.id)) {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                }
+              </span>
+              <span class="export-picker__type-badge export-picker__type-badge--{{ note.type }}">
+                {{ note.type }}
+              </span>
+              <span class="export-picker__note-title">
+                {{ note.title || 'Untitled' }}
+              </span>
+              <span class="export-picker__note-date">
+                {{ note.updatedAt | date:'MMM d' }}
+              </span>
+            </li>
+          }
+        </ul>
+
+        <div class="export-picker__footer">
+          <button class="export-picker__cancel" (click)="showExportPicker = false">Cancel</button>
+          <button class="export-picker__confirm"
+                  [disabled]="exportSelection.size === 0"
+                  (click)="confirmExport()">
+            Export {{ exportSelection.size }} {{ exportSelection.size === 1 ? 'note' : 'notes' }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 
 </div>

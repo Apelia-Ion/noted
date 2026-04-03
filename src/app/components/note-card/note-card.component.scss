@@ -10,32 +10,10 @@
   outline: none;
   min-height: 120px;
 
-  &:hover, &:focus-visible { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
-
-  &--text:hover,  &--text:focus-visible      { border-color: rgba(99,102,241,0.4); }
-  &--checklist:hover, &--checklist:focus-visible { border-color: rgba(13,148,136,0.4); }
-  &--audio:hover    { border-color: rgba(168,85,247,0.4); }
-  &--video:hover    { border-color: rgba(249,115,22,0.4); }
-  &--photo:hover    { border-color: rgba(16,185,129,0.4); }
-  &--drawing:hover  { border-color: rgba(239,68,68,0.4); }
-
-  &__header   { margin-bottom: 8px; }
-
-  &__badge {
-    display: inline-block;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 99px;
-
-    &--text      { background: var(--primary-light); color: var(--primary); }
-    &--checklist { background: var(--teal-light);    color: var(--teal); }
-    &--audio     { background: #fdf4ff; color: #a855f7; }
-    &--video     { background: #fff7ed; color: #f97316; }
-    &--photo     { background: #ecfdf5; color: #10b981; }
-    &--drawing   { background: #fef2f2; color: #ef4444; }
+  &:hover, &:focus-visible {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+    border-color: rgba(99,102,241,0.3);
   }
 
   &__title {

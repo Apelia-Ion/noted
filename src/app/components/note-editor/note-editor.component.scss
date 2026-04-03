@@ -38,24 +38,7 @@
   }
 }
 
-.topbar__badge {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 99px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  margin-right: auto; // push save button to the right
-
-  &--text      { background: var(--primary-light); color: var(--primary); }
-  &--checklist { background: var(--teal-light);    color: var(--teal); }
-  &--audio     { background: #fdf4ff; color: #a855f7; }
-  &--video     { background: #fff7ed; color: #f97316; }
-  &--photo     { background: #ecfdf5; color: #10b981; }
-  &--drawing   { background: #fef2f2; color: #ef4444; }
-}
+.topbar__spacer { flex: 1; }
 
 .topbar__save {
   display: flex;
@@ -105,17 +88,19 @@
   &:focus { border-bottom-color: var(--primary); }
 }
 
-.editor__attachment-section {
-  margin-top: 8px;
+.editor__section {
+  margin-bottom: 32px;
 }
 
-.editor__attachment-heading {
-  font-size: 0.78rem;
+.editor__section-heading {
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--text-muted);
   margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
 }
 
 .editor__textarea {

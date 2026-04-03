@@ -10,9 +10,7 @@
       Back
     </button>
 
-    <span class="topbar__badge topbar__badge--{{ note.type }}">
-      {{ note.type | titlecase }}
-    </span>
+    <span class="topbar__spacer"></span>
 
     <button class="topbar__save" (click)="save()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -26,15 +24,24 @@
   <!-- ── Editor body ─────────────────────────────────────────────────────── -->
   <div class="editor__body">
 
+    <!-- Title -->
     <input class="editor__title" type="text" placeholder="Title"
            [(ngModel)]="note.title" maxlength="200" autocomplete="off" />
 
-    <!-- NOTE: No HTML comments allowed between @if / @else if / @else blocks in Angular 17 -->
-    @if (note.type === 'text') {
-      <textarea class="editor__textarea" placeholder="Start writing…"
-                [(ngModel)]="note.content"></textarea>
-    } @else if (note.type === 'checklist') {
-      <div class="checklist">
+    <!-- Text description -->
+    @if (showSection('text')) {
+      <div class="editor__section">
+        <h3 class="editor__section-heading">Description</h3>
+        <textarea class="editor__textarea editor__textarea--short"
+                  placeholder="Add a description…"
+                  [(ngModel)]="note.content"></textarea>
+      </div>
+    }
+
+    <!-- Checklist -->
+    @if (showSection('checklist')) {
+      <div class="editor__section">
+        <h3 class="editor__section-heading">Checklist</h3>
         @if (note.items.length > 0) {
           <p class="checklist__progress">{{ checkedCount }} / {{ note.items.length }} done</p>
         }
@@ -56,8 +63,7 @@
               <input type="text" class="item-input" [class.item-input--checked]="item.checked"
                      [(ngModel)]="item.text" placeholder="Item…"
                      (keydown)="onItemKeydown($event, i)" autocomplete="off" />
-              <button class="checklist__remove" (click)="removeItem(i)"
-                      [disabled]="note.items.length === 1">
+              <button class="checklist__remove" (click)="removeItem(i)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round">
                   <path d="M18 6L6 18M6 6l12 12"/>
@@ -74,40 +80,54 @@
           Add item
         </button>
       </div>
-    } @else {
-      <!-- Media notes: audio / video / photo / drawing -->
-      <textarea class="editor__textarea editor__textarea--short"
-                placeholder="Add a description…"
-                [(ngModel)]="note.content"></textarea>
+    }
 
-      <div class="editor__attachment-section">
-        <h3 class="editor__attachment-heading">Attachments</h3>
+    <!-- Audio -->
+    @if (showSection('audio')) {
+      <div class="editor__section">
+        <h3 class="editor__section-heading">Audio</h3>
+        <app-audio-attachment
+          [attachments]="audioAttachments"
+          (attachmentAdded)="onAttachmentAdded($event)"
+          (attachmentRemoved)="onAttachmentRemoved($event)"
+        />
+      </div>
+    }
 
-        @if (note.type === 'audio') {
-          <app-audio-attachment
-            [attachments]="note.attachments"
-            (attachmentAdded)="onAttachmentAdded($event)"
-            (attachmentRemoved)="onAttachmentRemoved($event)"
-          />
-        } @else if (note.type === 'video') {
-          <app-video-attachment
-            [attachments]="note.attachments"
-            (attachmentAdded)="onAttachmentAdded($event)"
-            (attachmentRemoved)="onAttachmentRemoved($event)"
-          />
-        } @else if (note.type === 'photo') {
-          <app-photo-attachment
-            [attachments]="note.attachments"
-            (attachmentAdded)="onAttachmentAdded($event)"
-            (attachmentRemoved)="onAttachmentRemoved($event)"
-          />
-        } @else if (note.type === 'drawing') {
-          <app-drawing-attachment
-            [attachments]="note.attachments"
-            (attachmentAdded)="onAttachmentAdded($event)"
-            (attachmentRemoved)="onAttachmentRemoved($event)"
-          />
-        }
+    <!-- Video -->
+    @if (showSection('video')) {
+      <div class="editor__section">
+        <h3 class="editor__section-heading">Video</h3>
+        <app-video-attachment
+          [attachments]="videoAttachments"
+          (attachmentAdded)="onAttachmentAdded($event)"
+          (attachmentRemoved)="onAttachmentRemoved($event)"
+        />
+      </div>
+    }
+
+    <!-- Photos -->
+    @if (showSection('photo')) {
+      <div class="editor__section">
+        <h3 class="editor__section-heading">Photos</h3>
+        <app-photo-attachment
+          [attachments]="photoAttachments"
+          (attachmentAdded)="onAttachmentAdded($event)"
+          (attachmentRemoved)="onAttachmentRemoved($event)"
+        />
+      </div>
+    }
+
+    <!-- Drawing -->
+    @if (showSection('drawing')) {
+      <div class="editor__section">
+        <h3 class="editor__section-heading">Drawing</h3>
+        <app-drawing-attachment
+          [attachments]="drawingAttachments"
+          (attachmentAdded)="onAttachmentAdded($event)"
+          (attachmentRemoved)="onAttachmentRemoved($event)"
+          (attachmentUpdated)="onAttachmentUpdated($event)"
+        />
       </div>
     }
 

@@ -16,6 +16,20 @@
         <span class="home__count">{{ totalCount }} {{ totalCount === 1 ? 'note' : 'notes' }}</span>
       }
 
+      <!-- Combine -->
+      <button class="header-btn header-btn--outline" (click)="openCombinePicker()"
+              [disabled]="totalCount < 2" title="Combine notes" aria-label="Combine notes">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 6H4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4"/>
+          <path d="M16 6h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4"/>
+          <line x1="12" y1="2" x2="12" y2="22"/>
+          <polyline points="9 9 12 6 15 9"/>
+          <polyline points="9 15 12 18 15 15"/>
+        </svg>
+        Combine
+      </button>
+
       <!-- Export -->
       <button class="header-btn" (click)="openExportPicker()" [disabled]="exporting || totalCount === 0"
               title="Export notes" aria-label="Export notes">
@@ -28,7 +42,7 @@
         {{ exporting ? 'Exporting…' : 'Export' }}
       </button>
 
-      <!-- Import (hidden file input) -->
+      <!-- Import -->
       <label class="header-btn header-btn--outline" title="Import notes" aria-label="Import notes">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -48,23 +62,15 @@
 
   <!-- ── Toolbar ────────────────────────────────────────────────────────── -->
   <div class="toolbar">
-    <!-- Search -->
     <div class="toolbar__search">
       <svg class="toolbar__search-icon" width="16" height="16" viewBox="0 0 24 24"
            fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
-      <input
-        class="toolbar__search-input"
-        type="search"
-        placeholder="Search notes…"
-        [(ngModel)]="searchQuery"
-        (ngModelChange)="applyFilters()"
-        aria-label="Search notes"
-      />
+      <input class="toolbar__search-input" type="search" placeholder="Search notes…"
+             [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" aria-label="Search notes" />
     </div>
 
-    <!-- Filter tabs -->
     <div class="toolbar__filters" role="group" aria-label="Filter by type">
       <button class="filter-btn" [class.filter-btn--active]="filterType === 'all'"
               (click)="setFilter('all')">All</button>
@@ -76,7 +82,6 @@
               (click)="setFilter('media')">Media</button>
     </div>
 
-    <!-- Sort -->
     <div class="toolbar__sort">
       <label class="sr-only" for="sort-select">Sort by</label>
       <select id="sort-select" class="sort-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
@@ -98,7 +103,6 @@
   } @else {
     <div class="empty-state">
       @if (allNotes.length === 0) {
-        <!-- Truly empty -->
         <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
           <rect width="72" height="72" rx="18" fill="#f1f5f9"/>
           <path d="M22 25h28M22 35h28M22 45h18"
@@ -107,7 +111,6 @@
         <h2 class="empty-state__title">No notes yet</h2>
         <p class="empty-state__sub">Hit <strong>+</strong> to create your first note</p>
       } @else {
-        <!-- Search/filter produced no results -->
         <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
           <rect width="72" height="72" rx="18" fill="#f1f5f9"/>
           <circle cx="34" cy="34" r="14" stroke="#cbd5e1" stroke-width="3"/>
@@ -120,20 +123,12 @@
   }
 
   <!-- ── FAB ────────────────────────────────────────────────────────────── -->
-  <button class="fab" (click)="showTypePicker = true" aria-label="New note" title="New note">
+  <button class="fab" (click)="createNote()" aria-label="New note" title="New note">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
       <path d="M12 5v14M5 12h14"/>
     </svg>
   </button>
-
-  <!-- ── Type picker modal ──────────────────────────────────────────────── -->
-  @if (showTypePicker) {
-    <app-type-picker
-      (typeSelected)="onTypeSelected($event)"
-      (cancel)="showTypePicker = false"
-    />
-  }
 
   <!-- ── Export picker modal ────────────────────────────────────────────── -->
   @if (showExportPicker) {
@@ -145,7 +140,6 @@
             {{ exportSelection.size === allNotes.length ? 'Deselect all' : 'Select all' }}
           </button>
         </div>
-
         <ul class="export-picker__list">
           @for (note of allNotes; track note.id) {
             <li class="export-picker__item"
@@ -162,23 +156,62 @@
               <span class="export-picker__type-badge export-picker__type-badge--{{ note.type }}">
                 {{ note.type }}
               </span>
-              <span class="export-picker__note-title">
-                {{ note.title || 'Untitled' }}
-              </span>
-              <span class="export-picker__note-date">
-                {{ note.updatedAt | date:'MMM d' }}
-              </span>
+              <span class="export-picker__note-title">{{ note.title || 'Untitled' }}</span>
+              <span class="export-picker__note-date">{{ note.updatedAt | date:'MMM d' }}</span>
             </li>
           }
         </ul>
-
         <div class="export-picker__footer">
           <button class="export-picker__cancel" (click)="showExportPicker = false">Cancel</button>
-          <button class="export-picker__confirm"
-                  [disabled]="exportSelection.size === 0"
+          <button class="export-picker__confirm" [disabled]="exportSelection.size === 0"
                   (click)="confirmExport()">
             Export {{ exportSelection.size }} {{ exportSelection.size === 1 ? 'note' : 'notes' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── Combine picker modal ───────────────────────────────────────────── -->
+  @if (showCombinePicker) {
+    <div class="modal-backdrop" (click)="showCombinePicker = false">
+      <div class="export-picker" (click)="$event.stopPropagation()">
+        <div class="export-picker__header">
+          <h2 class="export-picker__title">Combine notes</h2>
+          <span class="export-picker__hint">Select 2 or more</span>
+        </div>
+        <ul class="export-picker__list">
+          @for (note of allNotes; track note.id) {
+            <li class="export-picker__item"
+                [class.export-picker__item--selected]="combineSelection.has(note.id)"
+                (click)="toggleCombineNote(note.id)">
+              <span class="export-picker__check">
+                @if (combineSelection.has(note.id)) {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                }
+              </span>
+              <span class="export-picker__type-badge export-picker__type-badge--{{ note.type }}">
+                {{ note.type }}
+              </span>
+              <span class="export-picker__note-title">{{ note.title || 'Untitled' }}</span>
+              <span class="export-picker__note-date">{{ note.updatedAt | date:'MMM d' }}</span>
+            </li>
+          }
+        </ul>
+        <div class="export-picker__footer export-picker__footer--combine">
+          <input class="combine-title-input" type="text" placeholder="Title for combined note…"
+                 [(ngModel)]="combineTitle" (keydown.enter)="confirmCombine()" maxlength="200" />
+          <div class="combine-footer-actions">
+            <button class="export-picker__cancel" (click)="showCombinePicker = false">Cancel</button>
+            <button class="export-picker__confirm"
+                    [disabled]="combineSelection.size < 2 || !combineTitle.trim()"
+                    (click)="confirmCombine()">
+              Combine {{ combineSelection.size > 0 ? combineSelection.size : '' }} notes
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { Note, ChecklistItem, Attachment, isMediaNote } from '../../models/note.model';
+import { Note, ChecklistItem, Attachment } from '../../models/note.model';
 import { NotesService } from '../../services/notes.service';
 import { AttachmentStoreService } from '../../services/attachment-store.service';
 import { AudioAttachmentComponent }   from '../attachments/audio-attachment/audio-attachment.component';
@@ -12,28 +12,19 @@ import { PhotoAttachmentComponent }   from '../attachments/photo-attachment/phot
 import { DrawingAttachmentComponent } from '../attachments/drawing-attachment/drawing-attachment.component';
 
 /**
- * NoteEditorComponent handles create and edit for all six note types.
+ * NoteEditorComponent — universal layout.
+ *
+ * Every note shows all sections (title, text, checklist, audio, video,
+ * photo, drawing).  For old typed notes only sections that have content
+ * OR match the original type are shown, so backward compatibility is
+ * preserved without any data migration.
  *
  * Attachment lifecycle
  * ─────────────────────
- * When the user adds an attachment the blob is saved to IndexedDB immediately
- * (so the attachment component can display it). Its ID is tracked in
- * `sessionAddedIds`.
- *
- * When the user removes an attachment the metadata is removed from the
- * in-memory note and the ID is moved to `pendingRemovalIds` — the blob is NOT
- * deleted yet, so a "back without save" leaves IDB untouched.
- *
- * Special case: if the user removes an attachment that was added in the same
- * session (never saved), it is deleted from IDB immediately and removed from
- * `sessionAddedIds`.
- *
- * On Save
- *   → delete `pendingRemovalIds` blobs from IDB, persist note to localStorage.
- *
- * On Back / Destroy without Save
- *   → delete `sessionAddedIds` blobs from IDB (they were never saved to a note).
- *     `pendingRemovalIds` are left alone (the original note still references them).
+ * sessionAddedIds  — blobs added this session; deleted on cancel.
+ * pendingRemovalIds — blobs marked for removal; deleted on Save.
+ * Auto-save fires after every attachment add/update so the note is
+ * persisted even if the user navigates away without clicking Save.
  */
 @Component({
   selector: 'app-note-editor',
@@ -49,10 +40,9 @@ import { DrawingAttachmentComponent } from '../attachments/drawing-attachment/dr
 export class NoteEditorComponent implements OnInit, OnDestroy {
   note!: Note;
   isNew = false;
-  readonly isMediaNote = isMediaNote;
 
   private savedSuccessfully = false;
-  private sessionAddedIds:  string[] = [];
+  private sessionAddedIds:   string[] = [];
   private pendingRemovalIds: string[] = [];
 
   constructor(
@@ -64,7 +54,7 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const id   = this.route.snapshot.paramMap.get('id');
-    const type = this.route.snapshot.queryParamMap.get('type') as 'text' | 'checklist' | 'audio' | 'video' | 'photo' | 'drawing' | null;
+    const type = this.route.snapshot.queryParamMap.get('type') as Note['type'] | null;
 
     if (id) {
       const existing = this.notesService.getNote(id);
@@ -72,24 +62,58 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
       this.note = { ...existing, items: existing.items.map(i => ({ ...i })), attachments: [...existing.attachments] };
     } else {
       this.isNew = true;
-      this.note  = this.notesService.buildNew(type ?? 'text');
-      if (this.note.type === 'checklist') {
-        this.note.items.push(this.notesService.buildItem());
-      }
+      this.note  = this.notesService.buildNew(type ?? 'universal');
     }
   }
 
   ngOnDestroy(): void {
     if (!this.savedSuccessfully) {
-      // Blobs added in this session were never tied to a persisted note — clean them up.
       this.attachmentStore.deleteMany(this.sessionAddedIds);
     }
+  }
+
+  // ── Section visibility ────────────────────────────────────────────────────
+
+  /**
+   * Returns true if a section should be rendered.
+   *   • Universal notes: always show all sections.
+   *   • Old typed notes: show if the section matches the original type
+   *     OR the section has content in it.
+   */
+  showSection(section: 'text' | 'checklist' | 'audio' | 'video' | 'photo' | 'drawing'): boolean {
+    if (this.note.type === 'universal') return true;
+    if ((this.note.type as string) === section) return true;
+
+    switch (section) {
+      case 'text':      return !!this.note.content?.trim();
+      case 'checklist': return (this.note.items?.length ?? 0) > 0;
+      case 'audio':     return this.audioAttachments.length > 0;
+      case 'video':     return this.videoAttachments.length > 0;
+      case 'photo':     return this.photoAttachments.length > 0;
+      case 'drawing':   return this.drawingAttachments.length > 0;
+    }
+  }
+
+  // ── Filtered attachment arrays (each component gets only its own type) ────
+
+  get audioAttachments(): Attachment[] {
+    return this.note.attachments.filter(a => a.mimeType?.startsWith('audio/'));
+  }
+  get videoAttachments(): Attachment[] {
+    return this.note.attachments.filter(a => a.mimeType?.startsWith('video/'));
+  }
+  get photoAttachments(): Attachment[] {
+    return this.note.attachments.filter(
+      a => a.mimeType?.startsWith('image/') && !a.name?.startsWith('drawing-'),
+    );
+  }
+  get drawingAttachments(): Attachment[] {
+    return this.note.attachments.filter(a => a.name?.startsWith('drawing-'));
   }
 
   // ── Persist ───────────────────────────────────────────────────────────────
 
   async save(): Promise<void> {
-    // First delete blobs the user removed during this session
     await this.attachmentStore.deleteMany(this.pendingRemovalIds);
     this.savedSuccessfully = true;
     this.notesService.save(this.note);
@@ -128,35 +152,37 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
 
   trackItem(_: number, item: ChecklistItem): string { return item.id; }
 
-  // ── Attachment events (emitted by child components) ───────────────────────
+  // ── Attachment events ─────────────────────────────────────────────────────
 
   async onAttachmentAdded(data: { blob: Blob; name: string; mimeType: string }): Promise<void> {
     const id = crypto.randomUUID();
     await this.attachmentStore.save(id, data.blob);
 
     const meta: Attachment = {
-      id,
-      name:      data.name,
-      mimeType:  data.mimeType,
-      size:      data.blob.size,
-      createdAt: new Date().toISOString(),
+      id, name: data.name, mimeType: data.mimeType,
+      size: data.blob.size, createdAt: new Date().toISOString(),
     };
-    // Push a new array reference so child @Input setter fires
     this.note.attachments = [...this.note.attachments, meta];
     this.sessionAddedIds.push(id);
 
-    // Auto-save so the attachment is persisted immediately (works for new and existing notes)
+    this.savedSuccessfully = true;
+    this.notesService.save(this.note);
+  }
+
+  async onAttachmentUpdated(data: { id: string; blob: Blob }): Promise<void> {
+    await this.attachmentStore.save(data.id, data.blob);
+    this.note.attachments = this.note.attachments.map(a =>
+      a.id === data.id ? { ...a, size: data.blob.size } : a,
+    );
     this.savedSuccessfully = true;
     this.notesService.save(this.note);
   }
 
   onAttachmentRemoved(id: string): void {
     if (this.sessionAddedIds.includes(id)) {
-      // Added and removed in the same session — delete immediately
       this.sessionAddedIds = this.sessionAddedIds.filter(s => s !== id);
       this.attachmentStore.delete(id);
     } else {
-      // Previously persisted — mark for deletion on Save
       this.pendingRemovalIds.push(id);
     }
     this.note.attachments = this.note.attachments.filter(a => a.id !== id);

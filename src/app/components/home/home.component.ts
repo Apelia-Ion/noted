@@ -4,26 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { Note, NoteType } from '../../models/note.model';
+import { Note } from '../../models/note.model';
 import { NotesService, FilterOption, SortOption } from '../../services/notes.service';
 import { ExportImportService } from '../../services/export-import.service';
 import { NoteCardComponent } from '../note-card/note-card.component';
-import { TypePickerComponent } from '../type-picker/type-picker.component';
 
-/**
- * HomeComponent is the main page.
- *
- * It subscribes to the NotesService stream and runs the notes through
- * applyFilters() whenever the list, search query, filter, or sort changes.
- *
- * Lifecycle:
- *  - subscribe in ngOnInit, unsubscribe in ngOnDestroy (no leaks).
- *  - showTypePicker drives the overlay visibility.
- */
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, NoteCardComponent, TypePickerComponent],
+  imports: [CommonModule, FormsModule, NoteCardComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -34,13 +23,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   searchQuery = '';
   filterType: FilterOption = 'all';
   sortBy: SortOption = 'newest';
-  showTypePicker = false;
 
-  importStatus: string | null = null;
+  // Export
   exporting = false;
   showExportPicker = false;
   exportSelection = new Set<string>();
+
+  // Import
+  importStatus: string | null = null;
   private importStatusTimer?: ReturnType<typeof setTimeout>;
+
+  // Combine
+  showCombinePicker = false;
+  combineSelection = new Set<string>();
+  combineTitle = '';
+
   private sub?: Subscription;
 
   constructor(
@@ -63,10 +60,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     this.filteredNotes = this.notesService.applyFilters(
-      this.allNotes,
-      this.searchQuery,
-      this.filterType,
-      this.sortBy,
+      this.allNotes, this.searchQuery, this.filterType, this.sortBy,
     );
   }
 
@@ -75,43 +69,33 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  onTypeSelected(type: NoteType): void {
-    this.showTypePicker = false;
-    this.router.navigate(['/note/new'], { queryParams: { type } });
+  createNote(): void {
+    this.router.navigate(['/note/new'], { queryParams: { type: 'universal' } });
   }
 
   onDeleteNote(id: string): void {
     this.notesService.delete(id);
   }
 
-  get totalCount(): number {
-    return this.allNotes.length;
-  }
+  get totalCount(): number { return this.allNotes.length; }
 
-  // ── Export / Import ───────────────────────────────────────────────────────
+  // ── Export ────────────────────────────────────────────────────────────────
 
   openExportPicker(): void {
-    // Pre-select all notes
     this.exportSelection = new Set(this.allNotes.map(n => n.id));
     this.showExportPicker = true;
   }
 
   toggleExportNote(id: string): void {
-    if (this.exportSelection.has(id)) {
-      this.exportSelection.delete(id);
-    } else {
-      this.exportSelection.add(id);
-    }
-    // trigger change detection on the Set
+    if (this.exportSelection.has(id)) { this.exportSelection.delete(id); }
+    else { this.exportSelection.add(id); }
     this.exportSelection = new Set(this.exportSelection);
   }
 
   toggleSelectAll(): void {
-    if (this.exportSelection.size === this.allNotes.length) {
-      this.exportSelection = new Set();
-    } else {
-      this.exportSelection = new Set(this.allNotes.map(n => n.id));
-    }
+    this.exportSelection = this.exportSelection.size === this.allNotes.length
+      ? new Set()
+      : new Set(this.allNotes.map(n => n.id));
   }
 
   async confirmExport(): Promise<void> {
@@ -124,11 +108,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ── Import ────────────────────────────────────────────────────────────────
+
   async onImport(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
     (event.target as HTMLInputElement).value = '';
     if (!file) return;
-
     try {
       const result = await this.exportImport.importFile(file);
       const parts: string[] = [];
@@ -145,5 +130,26 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.importStatus = msg;
     clearTimeout(this.importStatusTimer);
     this.importStatusTimer = setTimeout(() => { this.importStatus = null; }, 4000);
+  }
+
+  // ── Combine ───────────────────────────────────────────────────────────────
+
+  openCombinePicker(): void {
+    this.combineSelection = new Set();
+    this.combineTitle = '';
+    this.showCombinePicker = true;
+  }
+
+  toggleCombineNote(id: string): void {
+    if (this.combineSelection.has(id)) { this.combineSelection.delete(id); }
+    else { this.combineSelection.add(id); }
+    this.combineSelection = new Set(this.combineSelection);
+  }
+
+  confirmCombine(): void {
+    if (this.combineSelection.size < 2 || !this.combineTitle.trim()) return;
+    const combined = this.notesService.combine([...this.combineSelection], this.combineTitle.trim());
+    this.showCombinePicker = false;
+    this.router.navigate(['/note', combined.id]);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Note, NoteType, ChecklistItem, MEDIA_NOTE_TYPES } from '../models/note.model';
+import { Note, NoteType, ChecklistItem } from '../models/note.model';
 import { AttachmentStoreService } from './attachment-store.service';
 
 export type SortOption = 'newest' | 'oldest' | 'modified' | 'title';
@@ -44,7 +44,7 @@ export class NotesService {
 
   // ── Factory ───────────────────────────────────────────────────────────────
 
-  buildNew(type: NoteType): Note {
+  buildNew(type: NoteType = 'universal'): Note {
     const now = new Date().toISOString();
     return { id: crypto.randomUUID(), title: '', type, content: '', items: [], attachments: [], createdAt: now, updatedAt: now };
   }
@@ -68,6 +68,25 @@ export class NotesService {
   }
 
   /**
+   * Merges the given notes into a single new universal note, then removes the
+   * originals from the list WITHOUT deleting their blobs from IndexedDB (the
+   * blobs are reused by the combined note under the same attachment ids).
+   */
+  combine(ids: string[], newTitle: string): Note {
+    const notes = ids.map(id => this.getNote(id)).filter(Boolean) as Note[];
+    const combined = this.buildNew('universal');
+    combined.title       = newTitle;
+    combined.content     = notes.map(n => n.content ?? '').filter(s => s.trim()).join('\n\n');
+    combined.items       = notes.flatMap(n => n.items ?? []);
+    combined.attachments = notes.flatMap(n => n.attachments ?? []);
+
+    const remaining = this._notes$.value.filter(n => !ids.includes(n.id));
+    this._notes$.next([combined, ...remaining]);
+    this.persist();
+    return combined;
+  }
+
+  /**
    * Deletes a note and asynchronously removes any associated blobs from IndexedDB.
    * The note is removed from the BehaviorSubject and localStorage synchronously;
    * blob cleanup happens in the background without blocking the UI.
@@ -86,10 +105,12 @@ export class NotesService {
   applyFilters(notes: Note[], search: string, type: FilterOption, sort: SortOption): Note[] {
     let result = [...notes];
 
-    if (type === 'media') {
-      result = result.filter(n => (MEDIA_NOTE_TYPES as readonly string[]).includes(n.type));
-    } else if (type !== 'all') {
-      result = result.filter(n => n.type === type);
+    if (type === 'text') {
+      result = result.filter(n => n.content?.trim().length > 0);
+    } else if (type === 'checklist') {
+      result = result.filter(n => (n.items?.length ?? 0) > 0);
+    } else if (type === 'media') {
+      result = result.filter(n => (n.attachments?.length ?? 0) > 0);
     }
 
     const q = search.trim().toLowerCase();

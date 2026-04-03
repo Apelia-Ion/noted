@@ -1,4 +1,4 @@
-export type NoteType = 'text' | 'checklist' | 'audio' | 'video' | 'photo' | 'drawing';
+export type NoteType = 'text' | 'checklist' | 'audio' | 'video' | 'photo' | 'drawing' | 'universal';
 
 /** Types that use binary attachments stored in IndexedDB. */
 export const MEDIA_NOTE_TYPES: readonly NoteType[] = ['audio', 'video', 'photo', 'drawing'];

@@ -2,7 +2,7 @@ import {
   Component, Input, Output, EventEmitter, OnDestroy, AfterViewInit,
   ViewChild, ElementRef, ChangeDetectorRef, HostListener, NgZone
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Attachment } from '../../../models/note.model';
 import { AttachmentStoreService } from '../../../services/attachment-store.service';
@@ -12,7 +12,7 @@ const COLORS = ['#0f172a','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#a8
 @Component({
   selector: 'app-drawing-attachment',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './drawing-attachment.component.html',
   styleUrl: './drawing-attachment.component.scss',
 })
@@ -28,6 +28,7 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
 
   @Output() attachmentAdded   = new EventEmitter<{ blob: Blob; name: string; mimeType: string }>();
   @Output() attachmentRemoved = new EventEmitter<string>();
+  @Output() attachmentUpdated = new EventEmitter<{ id: string; blob: Blob }>();
 
   readonly colors = COLORS;
   color     = COLORS[0];
@@ -35,6 +36,7 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   isEraser  = false;
 
   urls = new Map<string, string>();
+  editingId: string | null = null;
   private destroyed = false;
 
   private ctx!: CanvasRenderingContext2D;
@@ -131,12 +133,32 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
 
   // ── Save drawing ──────────────────────────────────────────────────────────
 
+  async loadForEdit(att: Attachment): Promise<void> {
+    this.editingId = att.id;
+    const blob = await this.store.get(att.id);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => this.ngZone.run(() => {
+      const canvas = this.canvasRef.nativeElement;
+      this.fillWhite();
+      this.ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+    });
+    img.src = url;
+  }
+
   saveDrawing(): void {
     this.canvasRef.nativeElement.toBlob(blob => {
       if (!blob) return;
       this.ngZone.run(() => {
-        const name = `drawing-${Date.now()}.png`;
-        this.attachmentAdded.emit({ blob, name, mimeType: 'image/png' });
+        if (this.editingId) {
+          this.attachmentUpdated.emit({ id: this.editingId, blob });
+          this.editingId = null;
+        } else {
+          const name = `drawing-${Date.now()}.png`;
+          this.attachmentAdded.emit({ blob, name, mimeType: 'image/png' });
+        }
         this.fillWhite();
       });
     }, 'image/png');

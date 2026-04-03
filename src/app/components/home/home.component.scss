@@ -379,6 +379,16 @@
     padding: 14px 20px;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
+
+    &--combine {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+
+  &__hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
   }
 
   &__cancel {
@@ -406,6 +416,29 @@
     &:hover:not(:disabled) { background: var(--primary-hover); }
     &:disabled { opacity: 0.4; cursor: not-allowed; }
   }
+}
+
+.combine-title-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-btn);
+  background: var(--surface);
+  font-size: 0.875rem;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+  transition: border-color var(--transition);
+  box-sizing: border-box;
+
+  &::placeholder { color: var(--text-muted); }
+  &:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+}
+
+.combine-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 // ── Utility ────────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 import {
   Component, Input, Output, EventEmitter, OnDestroy, AfterViewInit,
-  ViewChild, ElementRef, ChangeDetectorRef, HostListener, NgZone
+  ViewChild, ElementRef, ChangeDetectorRef, NgZone, PLATFORM_ID, Inject
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Attachment } from '../../../models/note.model';
 import { AttachmentStoreService } from '../../../services/attachment-store.service';
@@ -21,10 +21,12 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
 
   @Input() set attachments(value: Attachment[]) {
     this._attachments = value;
-    this.loadUrls(value);
+    const ids = value.map(a => a.id).join(',');
+    if (ids !== this._loadedIds) { this._loadedIds = ids; this.loadUrls(value); }
   }
   get attachments(): Attachment[] { return this._attachments; }
   private _attachments: Attachment[] = [];
+  private _loadedIds = '';
 
   @Output() attachmentAdded   = new EventEmitter<{ blob: Blob; name: string; mimeType: string }>();
   @Output() attachmentRemoved = new EventEmitter<string>();
@@ -44,14 +46,19 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   private lastX = 0;
   private lastY = 0;
 
+  private readonly isBrowser: boolean;
+
   constructor(
     private store: AttachmentStoreService,
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
-  ) {}
+    @Inject(PLATFORM_ID) platformId: object,
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngAfterViewInit(): void {
-    this.initCanvas();
+    if (this.isBrowser) this.initCanvas();
   }
 
   ngOnDestroy(): void {
@@ -167,13 +174,14 @@ export class DrawingAttachmentComponent implements AfterViewInit, OnDestroy {
   // ── Thumbnail loading ─────────────────────────────────────────────────────
 
   private async loadUrls(attachments: Attachment[]): Promise<void> {
+    let changed = false;
     for (const att of attachments) {
       if (!this.urls.has(att.id)) {
         const url = await this.store.createObjectUrl(att.id);
-        if (url) this.urls.set(att.id, url);
+        if (url) { this.urls.set(att.id, url); changed = true; }
       }
     }
-    if (!this.destroyed) this.cdr.detectChanges();
+    if (changed && !this.destroyed) this.cdr.detectChanges();
   }
 
   getUrl(id: string): string { return this.urls.get(id) ?? ''; }

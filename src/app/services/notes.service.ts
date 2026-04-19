@@ -23,10 +23,26 @@ export class NotesService {
     if (typeof window === 'undefined') return;
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (raw) this._notes$.next(JSON.parse(raw));
+      if (raw) {
+        const notes: Note[] = JSON.parse(raw);
+        this._notes$.next(notes.map(n => this.normalize(n)));
+      }
     } catch {
       this._notes$.next([]);
     }
+  }
+
+  /**
+   * Ensures every Note has the required array fields, even if the note was
+   * persisted by an older version of the app that didn't include them.
+   */
+  private normalize(n: Note): Note {
+    return {
+      ...n,
+      content:     n.content     ?? '',
+      items:       n.items       ?? [],
+      attachments: n.attachments ?? [],
+    };
   }
 
   private persist(): void {
@@ -58,7 +74,7 @@ export class NotesService {
   save(note: Note): void {
     const list = this._notes$.value;
     const idx  = list.findIndex(n => n.id === note.id);
-    const updated: Note = { ...note, updatedAt: new Date().toISOString() };
+    const updated: Note = { ...this.normalize(note), updatedAt: new Date().toISOString() };
     if (idx >= 0) {
       const next = [...list]; next[idx] = updated; this._notes$.next(next);
     } else {
@@ -116,9 +132,9 @@ export class NotesService {
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter(n =>
-        n.title.toLowerCase().includes(q) ||
-        n.content.toLowerCase().includes(q) ||
-        n.items.some(i => i.text.toLowerCase().includes(q)),
+        n.title?.toLowerCase().includes(q) ||
+        n.content?.toLowerCase().includes(q) ||
+        n.items?.some(i => i.text?.toLowerCase().includes(q)),
       );
     }
 

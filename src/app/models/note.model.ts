@@ -30,9 +30,9 @@ export interface Note {
   id: string;
   title: string;
   type: NoteType;
-  content: string;          // free-text body; used by all types as description
-  items: ChecklistItem[];   // checklist items (only for type === 'checklist')
-  attachments: Attachment[]; // binary attachments (only for media types)
+  content: string;           // free-text body; used by all types as description
+  items: ChecklistItem[];    // checklist items; may be absent on old notes
+  attachments: Attachment[]; // binary attachments; may be absent on old notes
   createdAt: string;
   updatedAt: string;
 }

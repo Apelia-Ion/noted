@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -50,6 +50,7 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
     private router: Router,
     private notesService:    NotesService,
     private attachmentStore: AttachmentStoreService,
+    private ngZone: NgZone,
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +60,7 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
     if (id) {
       const existing = this.notesService.getNote(id);
       if (!existing) { this.router.navigate(['/']); return; }
-      this.note = { ...existing, items: existing.items.map(i => ({ ...i })), attachments: [...existing.attachments] };
+      this.note = { ...existing, items: (existing.items ?? []).map(i => ({ ...i })), attachments: [...(existing.attachments ?? [])] };
     } else {
       this.isNew = true;
       this.note  = this.notesService.buildNew(type ?? 'universal');
@@ -155,27 +156,45 @@ export class NoteEditorComponent implements OnInit, OnDestroy {
   // ── Attachment events ─────────────────────────────────────────────────────
 
   async onAttachmentAdded(data: { blob: Blob; name: string; mimeType: string }): Promise<void> {
+    console.log('[editor] onAttachmentAdded called, blob size:', data.blob.size, 'name:', data.name);
     const id = crypto.randomUUID();
-    await this.attachmentStore.save(id, data.blob);
+    try {
+      console.log('[editor] saving blob to IndexedDB id:', id);
+      await this.attachmentStore.save(id, data.blob);
+      console.log('[editor] blob saved to IndexedDB ok');
+    } catch (err) {
+      console.error('[editor] Failed to save attachment blob:', err);
+      return;
+    }
 
-    const meta: Attachment = {
-      id, name: data.name, mimeType: data.mimeType,
-      size: data.blob.size, createdAt: new Date().toISOString(),
-    };
-    this.note.attachments = [...this.note.attachments, meta];
-    this.sessionAddedIds.push(id);
-
-    this.savedSuccessfully = true;
-    this.notesService.save(this.note);
+    this.ngZone.run(() => {
+      console.log('[editor] ngZone.run — updating note.attachments');
+      const meta: Attachment = {
+        id, name: data.name, mimeType: data.mimeType,
+        size: data.blob.size, createdAt: new Date().toISOString(),
+      };
+      this.note.attachments = [...this.note.attachments, meta];
+      console.log('[editor] note.attachments count now:', this.note.attachments.length);
+      this.sessionAddedIds.push(id);
+      this.savedSuccessfully = true;
+      this.notesService.save(this.note);
+    });
   }
 
   async onAttachmentUpdated(data: { id: string; blob: Blob }): Promise<void> {
-    await this.attachmentStore.save(data.id, data.blob);
-    this.note.attachments = this.note.attachments.map(a =>
-      a.id === data.id ? { ...a, size: data.blob.size } : a,
-    );
-    this.savedSuccessfully = true;
-    this.notesService.save(this.note);
+    try {
+      await this.attachmentStore.save(data.id, data.blob);
+    } catch (err) {
+      console.error('Failed to update attachment blob:', err);
+      return;
+    }
+    this.ngZone.run(() => {
+      this.note.attachments = this.note.attachments.map(a =>
+        a.id === data.id ? { ...a, size: data.blob.size } : a,
+      );
+      this.savedSuccessfully = true;
+      this.notesService.save(this.note);
+    });
   }
 
   onAttachmentRemoved(id: string): void {

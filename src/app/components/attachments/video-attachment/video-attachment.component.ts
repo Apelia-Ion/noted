@@ -18,10 +18,12 @@ export class VideoAttachmentComponent implements OnDestroy {
 
   @Input() set attachments(value: Attachment[]) {
     this._attachments = value;
-    this.loadUrls(value);
+    const ids = value.map(a => a.id).join(',');
+    if (ids !== this._loadedIds) { this._loadedIds = ids; this.loadUrls(value); }
   }
   get attachments(): Attachment[] { return this._attachments; }
   private _attachments: Attachment[] = [];
+  private _loadedIds = '';
 
   @Output() attachmentAdded   = new EventEmitter<{ blob: Blob; name: string; mimeType: string }>();
   @Output() attachmentRemoved = new EventEmitter<string>();
@@ -49,13 +51,14 @@ export class VideoAttachmentComponent implements OnDestroy {
   }
 
   private async loadUrls(attachments: Attachment[]): Promise<void> {
+    let changed = false;
     for (const att of attachments) {
       if (!this.urls.has(att.id)) {
         const url = await this.store.createObjectUrl(att.id);
-        if (url) this.urls.set(att.id, url);
+        if (url) { this.urls.set(att.id, url); changed = true; }
       }
     }
-    if (!this.destroyed) this.cdr.detectChanges();
+    if (changed && !this.destroyed) this.cdr.detectChanges();
   }
 
   getUrl(id: string): string { return this.urls.get(id) ?? ''; }
@@ -77,11 +80,6 @@ export class VideoAttachmentComponent implements OnDestroy {
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-      // Show live preview
-      if (this.livePreviewRef) {
-        this.livePreviewRef.nativeElement.srcObject = this.stream;
-      }
-
       const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
         ? 'video/webm;codecs=vp9,opus'
         : 'video/webm';
@@ -93,6 +91,12 @@ export class VideoAttachmentComponent implements OnDestroy {
       this.recording  = true;
       this.recordTime = 0;
       this.timerRef   = setInterval(() => { this.recordTime++; this.cdr.markForCheck(); }, 1000);
+
+      // Show live preview — must happen after recording=true so @if renders <video>
+      this.cdr.detectChanges();
+      if (this.livePreviewRef) {
+        this.livePreviewRef.nativeElement.srcObject = this.stream;
+      }
     } catch {
       alert('Camera or microphone access denied.');
     }

@@ -22,122 +22,124 @@
   </div>
 
   <!-- ── Editor body ─────────────────────────────────────────────────────── -->
-  <div class="editor__body">
+  @if (note) {
+    <div class="editor__body">
 
-    <!-- Title -->
-    <input class="editor__title" type="text" placeholder="Title"
-           [(ngModel)]="note.title" maxlength="200" autocomplete="off" />
+      <!-- Title -->
+      <input class="editor__title" type="text" placeholder="Title"
+             [(ngModel)]="note.title" maxlength="200" autocomplete="off" />
 
-    <!-- Text description -->
-    @if (showSection('text')) {
-      <div class="editor__section">
-        <h3 class="editor__section-heading">Description</h3>
-        <textarea class="editor__textarea editor__textarea--short"
-                  placeholder="Add a description…"
-                  [(ngModel)]="note.content"></textarea>
-      </div>
-    }
-
-    <!-- Checklist -->
-    @if (showSection('checklist')) {
-      <div class="editor__section">
-        <h3 class="editor__section-heading">Checklist</h3>
-        @if (note.items.length > 0) {
-          <p class="checklist__progress">{{ checkedCount }} / {{ note.items.length }} done</p>
-        }
-        <ul class="checklist__list">
-          @for (item of note.items; track item.id; let i = $index) {
-            <li class="checklist__item">
-              <label class="checklist__check-wrap" [for]="'item-' + item.id">
-                <input type="checkbox" [id]="'item-' + item.id" class="checklist__checkbox"
-                       [(ngModel)]="item.checked" />
-                <span class="checklist__check-box" [class.checklist__check-box--checked]="item.checked">
-                  @if (item.checked) {
-                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 6l3 3 5-6" stroke="white" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  }
-                </span>
-              </label>
-              <input type="text" class="item-input" [class.item-input--checked]="item.checked"
-                     [(ngModel)]="item.text" placeholder="Item…"
-                     (keydown)="onItemKeydown($event, i)" autocomplete="off" />
-              <button class="checklist__remove" (click)="removeItem(i)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-              </button>
-            </li>
-          }
-        </ul>
-        <button class="checklist__add" (click)="addItemAfter()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          Add item
-        </button>
-      </div>
-    }
-
-    <!-- Audio -->
-    @if (showSection('audio')) {
-      <div class="editor__section">
-        <h3 class="editor__section-heading">Audio</h3>
-        <app-audio-attachment
-          [attachments]="audioAttachments"
-          (attachmentAdded)="onAttachmentAdded($event)"
-          (attachmentRemoved)="onAttachmentRemoved($event)"
-        />
-      </div>
-    }
-
-    <!-- Video -->
-    @if (showSection('video')) {
-      <div class="editor__section">
-        <h3 class="editor__section-heading">Video</h3>
-        <app-video-attachment
-          [attachments]="videoAttachments"
-          (attachmentAdded)="onAttachmentAdded($event)"
-          (attachmentRemoved)="onAttachmentRemoved($event)"
-        />
-      </div>
-    }
-
-    <!-- Photos -->
-    @if (showSection('photo')) {
-      <div class="editor__section">
-        <h3 class="editor__section-heading">Photos</h3>
-        <app-photo-attachment
-          [attachments]="photoAttachments"
-          (attachmentAdded)="onAttachmentAdded($event)"
-          (attachmentRemoved)="onAttachmentRemoved($event)"
-        />
-      </div>
-    }
-
-    <!-- Drawing -->
-    @if (showSection('drawing')) {
-      <div class="editor__section">
-        <h3 class="editor__section-heading">Drawing</h3>
-        <app-drawing-attachment
-          [attachments]="drawingAttachments"
-          (attachmentAdded)="onAttachmentAdded($event)"
-          (attachmentRemoved)="onAttachmentRemoved($event)"
-          (attachmentUpdated)="onAttachmentUpdated($event)"
-        />
-      </div>
-    }
-
-    <!-- ── Meta ──────────────────────────────────────────────────────────── -->
-    <div class="editor__meta">
-      <span><strong>Created</strong> {{ note.createdAt | date:'MMM d, y · h:mm a' }}</span>
-      @if (!isNew) {
-        <span><strong>Modified</strong> {{ note.updatedAt | date:'MMM d, y · h:mm a' }}</span>
+      <!-- Text description -->
+      @if (showSection('text')) {
+        <div class="editor__section">
+          <h3 class="editor__section-heading">Description</h3>
+          <textarea class="editor__textarea editor__textarea--short"
+                    placeholder="Add a description…"
+                    [(ngModel)]="note.content"></textarea>
+        </div>
       }
-    </div>
 
-  </div>
+      <!-- Checklist -->
+      @if (showSection('checklist')) {
+        <div class="editor__section">
+          <h3 class="editor__section-heading">Checklist</h3>
+          @if (note.items.length > 0) {
+            <p class="checklist__progress">{{ checkedCount }} / {{ note.items.length }} done</p>
+          }
+          <ul class="checklist__list">
+            @for (item of note.items; track item.id; let i = $index) {
+              <li class="checklist__item">
+                <label class="checklist__check-wrap" [for]="'item-' + item.id">
+                  <input type="checkbox" [id]="'item-' + item.id" class="checklist__checkbox"
+                         [(ngModel)]="item.checked" />
+                  <span class="checklist__check-box" [class.checklist__check-box--checked]="item.checked">
+                    @if (item.checked) {
+                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 6l3 3 5-6" stroke="white" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    }
+                  </span>
+                </label>
+                <input type="text" class="item-input" [class.item-input--checked]="item.checked"
+                       [(ngModel)]="item.text" placeholder="Item…"
+                       (keydown)="onItemKeydown($event, i)" autocomplete="off" />
+                <button class="checklist__remove" (click)="removeItem(i)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </button>
+              </li>
+            }
+          </ul>
+          <button class="checklist__add" (click)="addItemAfter()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Add item
+          </button>
+        </div>
+      }
+
+      <!-- Audio -->
+      @if (showSection('audio')) {
+        <div class="editor__section">
+          <h3 class="editor__section-heading">Audio</h3>
+          <app-audio-attachment
+            [attachments]="audioAttachments"
+            (attachmentAdded)="onAttachmentAdded($event)"
+            (attachmentRemoved)="onAttachmentRemoved($event)"
+          />
+        </div>
+      }
+
+      <!-- Video -->
+      @if (showSection('video')) {
+        <div class="editor__section">
+          <h3 class="editor__section-heading">Video</h3>
+          <app-video-attachment
+            [attachments]="videoAttachments"
+            (attachmentAdded)="onAttachmentAdded($event)"
+            (attachmentRemoved)="onAttachmentRemoved($event)"
+          />
+        </div>
+      }
+
+      <!-- Photos -->
+      @if (showSection('photo')) {
+        <div class="editor__section">
+          <h3 class="editor__section-heading">Photos</h3>
+          <app-photo-attachment
+            [attachments]="photoAttachments"
+            (attachmentAdded)="onAttachmentAdded($event)"
+            (attachmentRemoved)="onAttachmentRemoved($event)"
+          />
+        </div>
+      }
+
+      <!-- Drawing -->
+      @if (showSection('drawing')) {
+        <div class="editor__section">
+          <h3 class="editor__section-heading">Drawing</h3>
+          <app-drawing-attachment
+            [attachments]="drawingAttachments"
+            (attachmentAdded)="onAttachmentAdded($event)"
+            (attachmentRemoved)="onAttachmentRemoved($event)"
+            (attachmentUpdated)="onAttachmentUpdated($event)"
+          />
+        </div>
+      }
+
+      <!-- ── Meta ──────────────────────────────────────────────────────────── -->
+      <div class="editor__meta">
+        <span><strong>Created</strong> {{ note.createdAt | date:'MMM d, y · h:mm a' }}</span>
+        @if (!isNew) {
+          <span><strong>Modified</strong> {{ note.updatedAt | date:'MMM d, y · h:mm a' }}</span>
+        }
+      </div>
+
+    </div>
+  }
 </div>

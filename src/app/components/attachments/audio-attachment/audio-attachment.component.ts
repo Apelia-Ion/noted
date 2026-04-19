@@ -15,10 +15,12 @@ import { AttachmentStoreService } from '../../../services/attachment-store.servi
 export class AudioAttachmentComponent implements OnDestroy {
   @Input() set attachments(value: Attachment[]) {
     this._attachments = value;
-    this.loadUrls(value);
+    const ids = value.map(a => a.id).join(',');
+    if (ids !== this._loadedIds) { this._loadedIds = ids; this.loadUrls(value); }
   }
   get attachments(): Attachment[] { return this._attachments; }
   private _attachments: Attachment[] = [];
+  private _loadedIds = '';
 
   @Output() attachmentAdded   = new EventEmitter<{ blob: Blob; name: string; mimeType: string }>();
   @Output() attachmentRemoved = new EventEmitter<string>();
@@ -51,13 +53,16 @@ export class AudioAttachmentComponent implements OnDestroy {
   // ── Playback URLs ─────────────────────────────────────────────────────────
 
   private async loadUrls(attachments: Attachment[]): Promise<void> {
+    console.log('[audio] loadUrls called, count:', attachments.length);
+    let changed = false;
     for (const att of attachments) {
       if (!this.urls.has(att.id)) {
         const url = await this.store.createObjectUrl(att.id);
-        if (url) this.urls.set(att.id, url);
+        console.log('[audio] loadUrls got url for', att.id, ':', !!url);
+        if (url) { this.urls.set(att.id, url); changed = true; }
       }
     }
-    if (!this.destroyed) this.cdr.detectChanges();
+    if (changed && !this.destroyed) this.cdr.detectChanges();
   }
 
   getUrl(id: string): string { return this.urls.get(id) ?? ''; }
@@ -86,7 +91,14 @@ export class AudioAttachmentComponent implements OnDestroy {
       this.recorder  = new MediaRecorder(this.stream, { mimeType });
       this.chunks    = [];
       this.recorder.ondataavailable = e => { if (e.data.size > 0) this.chunks.push(e.data); };
-      this.recorder.onstop = () => this.ngZone.run(() => this.finalise(mimeType));
+      this.recorder.onstop = () => {
+        console.log('[audio] onstop fired, chunks:', this.chunks.length);
+        this.ngZone.run(() => {
+          this.stream?.getTracks().forEach(t => t.stop());
+          this.stream = undefined;
+          this.finalise(mimeType);
+        });
+      };
       this.recorder.start(100);
       this.recording  = true;
       this.recordTime = 0;
@@ -99,14 +111,17 @@ export class AudioAttachmentComponent implements OnDestroy {
   private stopRecording(): void {
     clearInterval(this.timerRef);
     if (this.recorder?.state !== 'inactive') this.recorder?.stop();
-    this.stream?.getTracks().forEach(t => t.stop());
+    // stream tracks are stopped inside onstop after all data is flushed
     this.recording = false;
   }
 
   private finalise(mimeType: string): void {
+    console.log('[audio] finalise called, chunks:', this.chunks.length);
     const ext  = mimeType.includes('ogg') ? 'ogg' : 'webm';
     const blob = new Blob(this.chunks, { type: mimeType });
+    console.log('[audio] blob size:', blob.size);
     const name = `recording-${Date.now()}.${ext}`;
+    console.log('[audio] emitting attachmentAdded:', name);
     this.attachmentAdded.emit({ blob, name, mimeType });
   }
 
